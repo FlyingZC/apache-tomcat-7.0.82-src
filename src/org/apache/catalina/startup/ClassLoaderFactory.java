@@ -159,7 +159,7 @@ public final class ClassLoaderFactory {
         if (log.isDebugEnabled())
             log.debug("Creating new class loader");
 
-        // Construct the "class path" for this class loader
+        // Construct the "class path" for this class loader 保存类加载的路径
         Set<URL> set = new LinkedHashSet<URL>();
 
         if (repositories != null) {
@@ -221,14 +221,14 @@ public final class ClassLoaderFactory {
             }
         }
 
-        // Construct the class loader itself
+        // Construct the class loader itself 创建classLoader
         final URL[] array = set.toArray(new URL[set.size()]);
         if (log.isDebugEnabled())
             for (int i = 0; i < array.length; i++) {
                 log.debug("  location " + i + " is " + array[i]);
             }
 
-        return AccessController.doPrivileged(
+        return AccessController.doPrivileged(// 访问控制器,安全机制,获取更大的权限
                 new PrivilegedAction<URLClassLoader>() {
                     @Override
                     public URLClassLoader run() {

@@ -74,7 +74,7 @@ import org.apache.tomcat.util.modeler.Registry;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/** 负责server组件内 全局命名资源在不同生命周期的不同操作.在tomcat启动时 创建命名资源,绑定命名资源,在tomcat停止前解绑命名资源,反注册MBean.
  * Helper class used to initialize and populate the JNDI context associated
  * with each context and server.
  *
@@ -224,7 +224,7 @@ public class NamingContextListener
     // ---------------------------------------------- LifecycleListener Methods
 
 
-    /**
+    /**负责server组件内 全局命名资源在不同生命周期的不同操作.在tomcat启动时 创建命名资源,绑定命名资源,在tomcat停止前解绑命名资源,反注册MBean.
      * Acknowledge the occurrence of the specified event.
      *
      * @param event LifecycleEvent that has occurred

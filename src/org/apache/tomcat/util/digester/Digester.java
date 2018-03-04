@@ -2132,7 +2132,7 @@ public class Digester extends DefaultHandler2 {
 
     /**
      * Add an "object create" rule for the specified parameters.
-     *
+     * 为指定的参数添加一个“对象创建”规则。
      * @param pattern Element matching pattern
      * @param className Default Java class name to be created
      * @param attributeName Attribute name that optionally overrides

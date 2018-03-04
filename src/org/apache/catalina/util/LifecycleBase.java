@@ -98,7 +98,7 @@ public abstract class LifecycleBase implements Lifecycle {
         }
 
         try {
-            setStateInternal(LifecycleState.INITIALIZING, null, false);
+            setStateInternal(LifecycleState.INITIALIZING, null, false);// 调用各个事件监听中的 initializing
             initInternal();
             setStateInternal(LifecycleState.INITIALIZED, null, false);
         } catch (Throwable t) {

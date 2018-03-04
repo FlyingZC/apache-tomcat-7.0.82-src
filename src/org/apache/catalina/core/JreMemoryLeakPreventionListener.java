@@ -41,7 +41,7 @@ import org.apache.tomcat.util.res.StringManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 
-/**
+/**解决jre内存泄露 和 锁文件 的一种措施.该监听器会在tomcat初始化时使用系统类加载器先加载一些类 和 设置缓存属性,以避免内存泄露 和 锁文件.
  * Provide a workaround for known places where the Java Runtime environment can
  * cause a memory leak or lock files.
  * <p>
@@ -65,7 +65,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
     private static final boolean IS_JAVA_7_OR_LATER;
     private static final boolean IS_JAVA_8_OR_LATER;
 
-    static {
+    static {// 尝试加载java.util.Objects,若加载成功则表示是jdk7及其之后.加载失败则为7之前
         boolean isJava7OrLater;
         try {
             Class.forName("java.util.Objects");
@@ -76,7 +76,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
         IS_JAVA_7_OR_LATER = isJava7OrLater;
 
         boolean isJava8OrLater;
-        try {
+        try {// 判断是否是jdk8及其之后
             Class.forName("java.util.Optional");
             isJava8OrLater = true;
         } catch (ClassNotFoundException e) {
@@ -89,7 +89,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
     private static final String FORK_JOIN_POOL_THREAD_FACTORY_PROPERTY =
             "java.util.concurrent.ForkJoinPool.common.threadFactory";
 
-    /**
+    /**防止第一次调用sun.awt.AppContext.getAppContext()时引起的内存泄漏
      * Protect against the memory leak caused when the first call to
      * <code>sun.awt.AppContext.getAppContext()</code> is triggered by a web
      * application. Defaults to <code>true</code> for Java 6 and earlier (since
@@ -105,7 +105,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
         this.appContextProtection = appContextProtection;
     }
 
-    /**
+    /**防止第一次调用java.awt.Toolkit.getDefaultToolkit()时发生内存泄露
      * Protect against the memory leak caused when the first call to
      * <code>java.awt.Toolkit.getDefaultToolkit()</code> is triggered
      * by a web application. Defaults to <code>false</code> because a new
@@ -117,7 +117,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
       this.awtThreadProtection = awtThreadProtection;
     }
 
-    /**
+    /**防止加载sun.java2d.Disposer时发生内存泄露
      * Protect against the memory leak caused when the
      * <code>sun.java2d.Disposer</code> class is loaded by a web application.
      * Defaults to <code>false</code> because a new Thread is launched.
@@ -130,7 +130,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
         this.java2dDisposerProtection = java2dDisposerProtection;
     }
 
-    /**
+    /**防止首次加载sun.misc.GC.requestLatency(long)导致内存泄露
      * Protect against the memory leak caused when the first call to
      * <code>sun.misc.GC.requestLatency(long)</code> is triggered by a web
      * application. This first call will start a GC Daemon thread with the
@@ -274,7 +274,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
             try
-            {
+            {   // 1.先设置 当前线程的上下文类加载器 为 系统类加载器.加载一些容器导致内存泄露的类 和 解决锁文件
                 // Use the system classloader as the victim for all this
                 // ClassLoader pinning we're about to do.
                 Thread.currentThread().setContextClassLoader(
@@ -447,7 +447,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
                  * - log4j versions 1.2.15 and earlier
                  * - javax.xml.bind.JAXBContext.newInstance()
                  */
-
+                // 2.设置URLConnection方式读取本地jar包时,默认不缓存jar包,解决锁文件问题
                 // Set the default URL caching policy to not to cache
                 if (urlCacheProtection) {
                     try {
@@ -537,7 +537,7 @@ public class JreMemoryLeakPreventionListener implements LifecycleListener {
                     }
                 }
 
-            } finally {
+            } finally {// 3.最后将当前线程的类加载器 还原为 上下文类加载器
                 Thread.currentThread().setContextClassLoader(loader);
             }
         }

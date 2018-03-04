@@ -39,7 +39,7 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.modeler.Registry;
 
 
-/**
+/**实例化server组件里JNDI资源的MBean,并提交JMX管理.在启动时为JNDI创建MBean,在停止时销毁MBean
  * Implementation of <code>LifecycleListener</code> that instantiates the
  * set of MBeans associated with global JNDI resources that are subject to
  * management.
@@ -69,7 +69,7 @@ public class GlobalResourcesLifecycleListener
     // ---------------------------------------------- LifecycleListener Methods
 
 
-    /**
+    /**实例化server组件里JNDI资源的MBean,并提交JMX管理.在启动时为JNDI创建MBean,在停止时销毁MBean
      * Primary entry point for startup and shutdown events.
      *
      * @param event The event that has occurred

@@ -35,7 +35,7 @@ import org.apache.tomcat.util.net.AbstractEndpoint.Handler.SocketState;
 import org.apache.tomcat.util.security.PrivilegedSetTccl;
 
 
-/**
+/** 套接字接收终端(1)负责启动某端口监听客户端请求,(2)负责接收套接字连接,(3)负责提供一个线程池系统处理接收到的套接字连接(4)负责对连接数的控制(5)负责安全与非安全套接字连接的实现等.包含连接数控制器LimitLatch,Socket接收器Acceptor,套接字工厂ServerSocketFactory,任务执行器Executor,任务定义器SocketProcessor
  * Handle incoming TCP connections.
  *
  * This class implement a simple server model: one listener thread accepts on a socket and

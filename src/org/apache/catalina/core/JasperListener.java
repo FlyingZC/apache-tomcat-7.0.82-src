@@ -27,7 +27,7 @@ import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/**在tomcat初始化前该监听器会初始化Jasper组件,Jasper是tomcat的JSP编译器核心引擎,用于在web应用启动前初始化Jasper
  * This listener is designed to initialize Jasper before any web applications are
  * started.
  *

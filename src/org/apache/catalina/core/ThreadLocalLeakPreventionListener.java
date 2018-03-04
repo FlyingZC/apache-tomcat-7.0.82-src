@@ -37,7 +37,7 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.res.StringManager;
 import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 
-/**
+/**解决ThreadLocal的使用可能带来的内存泄露问题.该监听器会在web应用重加载时 销毁线程池的线程 并 重新创建新线程,避免ThreadLocal内存泄露
  * <p>
  * A {@link LifecycleListener} that triggers the renewal of threads in Executor
  * pools when a {@link Context} is being stopped to avoid thread-local related

@@ -179,7 +179,7 @@ public class Catalina {
     }
 
 
-    /**
+    /**设置 共享的 拓展类加载器
      * Set the shared extensions class loader.
      *
      * @param parentClassLoader The shared extensions class loader.
@@ -311,7 +311,7 @@ public class Catalina {
         digester.setFakeAttributes(fakeAttributes);
         digester.setUseContextClassLoader(true);
 
-        // Configure the actions we will be using
+        // Configure the actions we will be using, 配置我们将要使用的操作
         digester.addObjectCreate("Server",
                                  "org.apache.catalina.core.StandardServer",
                                  "className");
@@ -678,7 +678,7 @@ public class Catalina {
      */
     public void start() {
 
-        if (getServer() == null) {
+        if (getServer() == null) {// server若未初始化,则先load()
             load();
         }
 
@@ -800,7 +800,7 @@ public class Catalina {
 
     protected void initDirs() {
 
-        String catalinaHome = System.getProperty(Globals.CATALINA_HOME_PROP);
+        String catalinaHome = System.getProperty(Globals.CATALINA_HOME_PROP);// E:\Java\apache-tomcat-7.0.82-01
         if (catalinaHome == null) {
             // Backwards compatibility patch for J2EE RI 1.3
             String j2eeHome = System.getProperty("com.sun.enterprise.home");
@@ -829,7 +829,7 @@ public class Catalina {
         if (System.getProperty(Globals.CATALINA_BASE_PROP) == null) {
             System.setProperty(Globals.CATALINA_BASE_PROP,
                                catalinaHome);
-        } else {
+        } else {//catalina.base为  D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2
             String catalinaBase = System.getProperty(Globals.CATALINA_BASE_PROP);
             File base = new File(catalinaBase);
             if (!base.isAbsolute()) {

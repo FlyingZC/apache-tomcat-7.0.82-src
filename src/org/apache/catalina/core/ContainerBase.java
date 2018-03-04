@@ -409,7 +409,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
     }
 
 
-    /*
+    /* 提供对连接到这个容器的加载器组件的访问。
      * Provide access to just the loader component attached to this container.
      */
     protected Loader getLoaderInternal() {
@@ -1207,7 +1207,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
     @Override
     protected synchronized void startInternal() throws LifecycleException {
 
-        // Start our subordinate components, if any
+        // Start our subordinate components, if any.启动下属组件
         Loader loader = getLoaderInternal();
         if ((loader != null) && (loader instanceof Lifecycle))
             ((Lifecycle) loader).start();
@@ -1226,7 +1226,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         if ((resources != null) && (resources instanceof Lifecycle))
             ((Lifecycle) resources).start();
 
-        // Start our child containers, if any
+        // Start our child containers, if any.启动子容器,如果有的话.
         Container children[] = findChildren();
         List<Future<Void>> results = new ArrayList<Future<Void>>();
         for (int i = 0; i < children.length; i++) {
@@ -1248,7 +1248,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
                     sm.getString("containerBase.threadedStartFailed"));
         }
 
-        // Start the Valves in our pipeline (including the basic), if any
+        // Start the Valves in our pipeline (including the basic), if any.若有管道,则启动
         if (pipeline instanceof Lifecycle)
             ((Lifecycle) pipeline).start();
 

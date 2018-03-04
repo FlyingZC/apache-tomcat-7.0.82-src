@@ -31,7 +31,7 @@ import org.apache.tomcat.util.net.SSLImplementation;
 import org.apache.tomcat.util.net.SocketWrapper;
 
 
-/**
+/**HTTP协议1.1版本的抽象.包含 接收客户端连接,接收客户端消息报文,报文解析处理,对客户端响应等过程.
  * Abstract the protocol implementation, including threading, etc.
  * Processor is single threaded and specific to stream-based protocols,
  * will not fit Jk protocols like JNI.

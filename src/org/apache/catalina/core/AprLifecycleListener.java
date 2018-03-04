@@ -36,7 +36,7 @@ import org.apache.tomcat.util.res.StringManager;
 
 
 
-/**
+/** 在tomcat初始化前,该监听器会尝试初始化APR库,若能初始化成功,则使用APR接收并进行处理;tomcat销毁后对APR清理
  * Implementation of <code>LifecycleListener</code> that will init and
  * and destroy APR.
  *
@@ -117,7 +117,7 @@ public class AprLifecycleListener
 
     // ---------------------------------------------- LifecycleListener Methods
 
-    /**
+    /**在tomcat初始化前,该监听器会尝试初始化APR库,若能初始化成功,则使用APR接收并进行处理;tomcat销毁后对APR清理
      * Primary entry point for startup and shutdown events.
      *
      * @param event The event that has occurred

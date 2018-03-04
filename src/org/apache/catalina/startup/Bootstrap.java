@@ -53,7 +53,7 @@ public final class Bootstrap {
 
 
     /**
-     * Daemon object used by main.
+     * Daemon object used by main.此处就是bootstrap的实例
      */
     private static Bootstrap daemon = null;
 
@@ -62,7 +62,7 @@ public final class Bootstrap {
 
 
     /**
-     * Daemon reference.
+     * Daemon reference.此处设置为catalina的实例
      */
     private Object catalinaDaemon = null;
 
@@ -91,7 +91,7 @@ public final class Bootstrap {
         }
     }
 
-
+    /**若配置了路径,则创建classLoader,否则返回父classLoader */
     private ClassLoader createClassLoader(String name, ClassLoader parent)
         throws Exception {
 
@@ -102,7 +102,7 @@ public final class Bootstrap {
         value = replace(value);
 
         List<Repository> repositories = new ArrayList<Repository>();
-
+        // D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2/lib,D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2/lib/*.jar,E:\Java\apache-tomcat-7.0.82-01/lib,E:\Java\apache-tomcat-7.0.82-01/lib/*.jar
         StringTokenizer tokenizer = new StringTokenizer(value, ",");
         while (tokenizer.hasMoreElements()) {
             String repository = tokenizer.nextToken().trim();
@@ -122,16 +122,16 @@ public final class Bootstrap {
             }
 
             // Local repository
-            if (repository.endsWith("*.jar")) {
+            if (repository.endsWith("*.jar")) {// 全局jar
                 repository = repository.substring
                     (0, repository.length() - "*.jar".length());
                 repositories.add(
                         new Repository(repository, RepositoryType.GLOB));
-            } else if (repository.endsWith(".jar")) {
+            } else if (repository.endsWith(".jar")) {// jar
                 repositories.add(
                         new Repository(repository, RepositoryType.JAR));
             } else {
-                repositories.add(
+                repositories.add(// dir
                         new Repository(repository, RepositoryType.DIR));
             }
         }
@@ -139,7 +139,7 @@ public final class Bootstrap {
         return ClassLoaderFactory.createClassLoader(repositories, parent);
     }
 
-    /**
+    /**将${catalina.home}等替换成具体的路径
      * System property replacement in the given string.
      * 
      * @param str The original string
@@ -185,7 +185,7 @@ public final class Bootstrap {
     }
 
 
-    /**
+    /** 1.创建StandardClassLoader类加载器,并设置为main线程的线程上下文类加载器;2.通过StandardClassLoader加载类Cataline并创建Catalina对象 ,并保存到Boosstrap对象.
      * Initialize daemon.
      */
     public void init()
@@ -202,7 +202,7 @@ public final class Bootstrap {
 
         SecurityClassLoad.securityClassLoad(catalinaLoader);
 
-        // Load our startup class and call its process() method
+        // Load our startup class and call its process() method, 使用catalinaLoader加载Catalina类
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
         Class<?> startupClass =
@@ -210,7 +210,7 @@ public final class Bootstrap {
             ("org.apache.catalina.startup.Catalina");
         Object startupInstance = startupClass.newInstance();
 
-        // Set the shared extensions class loader
+        // Set the shared extensions class loader, 调用catalina.setParentClassLoader方法.将java.lang.ClassLoader设为
         if (log.isDebugEnabled())
             log.debug("Setting startup class properties");
         String methodName = "setParentClassLoader";
@@ -228,7 +228,7 @@ public final class Bootstrap {
 
 
     /**
-     * Load daemon.
+     * Load daemon.调用load方法
      */
     private void load(String[] arguments)
         throws Exception {
@@ -393,7 +393,7 @@ public final class Bootstrap {
 
         if (daemon == null) {
             // Don't set daemon until init() has completed
-            Bootstrap bootstrap = new Bootstrap();
+            Bootstrap bootstrap = new Bootstrap();// 实例化Bootstrap的一个实例  
             try {
                 bootstrap.init();
             } catch (Throwable t) {
@@ -422,7 +422,7 @@ public final class Bootstrap {
             } else if (command.equals("stopd")) {
                 args[args.length - 1] = "stop";
                 daemon.stop();
-            } else if (command.equals("start")) {
+            } else if (command.equals("start")) {// 处理start命令
                 daemon.setAwait(true);
                 daemon.load(args);
                 daemon.start();
