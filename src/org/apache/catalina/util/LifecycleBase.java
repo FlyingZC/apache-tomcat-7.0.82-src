@@ -96,10 +96,10 @@ public abstract class LifecycleBase implements Lifecycle {
         if (!state.equals(LifecycleState.NEW)) {
             invalidTransition(Lifecycle.BEFORE_INIT_EVENT);
         }
-
-        try {
+        // 从StandardServer到StandardWrapper，都会调用initInternal()，并伴随调用共有父类LifecycleBase.init()
+        try {// 变更生命周期状态(通过事件变更)
             setStateInternal(LifecycleState.INITIALIZING, null, false);// 调用各个事件监听中的 initializing
-            initInternal();
+            initInternal();// 进入子类的initInternal()方法
             setStateInternal(LifecycleState.INITIALIZED, null, false);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);

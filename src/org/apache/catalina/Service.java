@@ -20,7 +20,7 @@ package org.apache.catalina;
 
 import org.apache.catalina.connector.Connector;
 
-/**
+/** Service是包含Connector和Container的集合，Service用适当的Connector接收用户的请求，再发给相应的Container来处理。
  * A <strong>Service</strong> is a group of one or more
  * <strong>Connectors</strong> that share a single <strong>Container</strong>
  * to process their incoming requests.  This arrangement allows, for example,

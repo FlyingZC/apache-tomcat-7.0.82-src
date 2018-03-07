@@ -54,7 +54,7 @@ import org.apache.tomcat.util.modeler.modules.ModelerSource;
     checks in the mbean server ?
 */ 
 
-/**
+/** Tomcat会为每个组件进行注册过程，通过Registry管理起来，而Registry是基于JMX来实现的，因此在看组件的init和start过程实际上就是初始化MBean和触发MBean的start方法，会大量看到形如：Registry.getRegistry(null, null).invoke(mbeans, "start", false);这样的代码,实际上就是通过JMX管理各种组件的行为和生命期。
  * Registry for modeler MBeans. 
  *
  * This is the main entry point into modeler. It provides methods to create

@@ -31,7 +31,7 @@ import org.apache.catalina.connector.Response;
 import org.apache.juli.logging.Log;
 
 
-/**
+/** 可以理解为处理某类型请求的容器，处理的方式一般为把处理请求的处理器包装为Valve对象，并按一定顺序放入类型为Pipeline的管道里。Container有多种子类型：Engine、Host、Context和Wrapper，这几种子类型Container依次包含，处理不同粒度的请求。另外Container里包含一些基础服务，如Loader、Manager和Realm。
  * A <b>Container</b> is an object that can execute requests received from
  * a client, and return responses based on those requests.  A Container may
  * optionally support a pipeline of Valves that process the request in an

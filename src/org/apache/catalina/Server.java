@@ -21,7 +21,7 @@ package org.apache.catalina;
 import org.apache.catalina.deploy.NamingResources;
 import org.apache.catalina.startup.Catalina;
 
-/**
+/** 是整个Tomcat组件的容器，包含一个或多个Service。
  * A <code>Server</code> element represents the entire Catalina
  * servlet container.  Its attributes represent the characteristics of
  * the servlet container as a whole.  A <code>Server</code> may contain

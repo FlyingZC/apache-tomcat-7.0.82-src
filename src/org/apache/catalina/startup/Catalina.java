@@ -48,7 +48,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
 
-/**
+/**与开始/关闭shell脚本交互的主类，因此如果要研究启动和关闭的过程，就从这个类开始看起。
  * Startup/Shutdown shell program for Catalina.  The following command line
  * options are recognized:
  * <ul>
@@ -535,7 +535,7 @@ public class Catalina {
     }
 
 
-    /**
+    /** 加载配置资源，通过反射调用catalina.load方法，利用catalina.load方法创建digester实例，从而解析conf/server.xml文件
      * Start a new server instance.
      */
     public void load() {
@@ -548,7 +548,7 @@ public class Catalina {
 
         initNaming();
 
-        // Create and execute our Digester
+        // Create and execute our Digester.预定义了解析规则
         Digester digester = createStartDigester();
 
         InputSource inputSource = null;
@@ -556,7 +556,7 @@ public class Catalina {
         File file = null;
         try {
             try {
-                file = configFile();
+                file = configFile();// 获取conf/server.xml文件
                 inputStream = new FileInputStream(file);
                 inputSource = new InputSource(file.toURI().toURL().toString());
             } catch (Exception e) {
@@ -614,7 +614,7 @@ public class Catalina {
             try {
                 inputSource.setByteStream(inputStream);
                 digester.push(this);
-                digester.parse(inputSource);
+                digester.parse(inputSource);// 解析conf/server.xml文件(SAX)，并根据规则初始化各个组件实例和关联关系：如server元素实例化standardServer实例对象，把属性内容set到对应实例中
             } catch (SAXParseException spe) {
                 log.warn("Catalina.start using " + getConfigFile() + ": " +
                         spe.getMessage());
@@ -632,7 +632,7 @@ public class Catalina {
                 }
             }
         }
-
+        // server关联catalina，在解析server.xml过程中，会发现父子元素对应实例的相互关联性(双向性)    
         getServer().setCatalina(this);
 
         // Stream redirection
@@ -640,7 +640,7 @@ public class Catalina {
 
         // Start the new server
         try {
-            getServer().init();
+            getServer().init();// 调用各个组件的init方法，初始化各个组件  
         } catch (LifecycleException e) {
             if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE")) {
                 throw new java.lang.Error(e);

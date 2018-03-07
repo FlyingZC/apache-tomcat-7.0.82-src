@@ -18,7 +18,7 @@
 
 package org.apache.catalina;
 
-/**
+/** Engine包含Host和Context，接到请求后仍给相应的Host在相应的Context里处理。
  * An <b>Engine</b> is a Container that represents the entire Catalina servlet
  * engine.  It is useful in the following types of scenarios:
  * <ul>

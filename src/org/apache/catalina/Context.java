@@ -45,7 +45,7 @@ import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.util.http.mapper.Mapper;
 
 
-/**
+/** 就是我们所部属的具体Web应用的上下文，说白了就是我们的应用，每个请求都在是相应的上下文里处理的。
  * A <b>Context</b> is a Container that represents a servlet context, and
  * therefore an individual web application, in the Catalina servlet engine.
  * It is therefore useful in almost every deployment of Catalina (even if a

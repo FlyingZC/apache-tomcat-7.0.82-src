@@ -23,7 +23,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 
-/**
+/** 是被Container用来管理Session池。
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
  * particular Container.  Different Manager implementations may support
  * value-added features such as the persistent storage of session data,

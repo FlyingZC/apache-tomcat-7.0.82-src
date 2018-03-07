@@ -27,7 +27,7 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.deploy.SecurityConstraint;
 import org.ietf.jgss.GSSContext;
-/**
+/** 是用来处理安全里授权与认证。
  * A <b>Realm</b> is a read-only facade for an underlying security realm
  * used to authenticate individual users, and identify the security roles
  * associated with those users.  Realms can be attached at any Container

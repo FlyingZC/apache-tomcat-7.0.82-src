@@ -38,7 +38,7 @@ import org.apache.tomcat.util.http.mapper.Mapper;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/** 实现某一协议的连接器，如默认的有实现HTTP、HTTPS、AJP协议的。
  * Implementation of a Coyote connector.
  *
  * @author Craig R. McClanahan

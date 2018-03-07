@@ -25,7 +25,7 @@ import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 
 
-/**
+/**Wrapper是针对每个Servlet的Container，每个Servlet都有相应的Wrapper来管理。
  * A <b>Wrapper</b> is a Container that represents an individual servlet
  * definition from the deployment descriptor of the web application.  It
  * provides a convenient mechanism to use Interceptors that see every single

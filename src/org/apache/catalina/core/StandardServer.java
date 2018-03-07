@@ -799,7 +799,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         // will be registered under multiple names
         onameStringCache = register(new StringCache(), "type=StringCache");
 
-        // Register the MBeanFactory
+        // Register the MBeanFactory.注册mbean 
         MBeanFactory factory = new MBeanFactory();
         factory.setContainer(this);
         onameMBeanFactory = register(factory, "type=MBeanFactory");

@@ -32,7 +32,7 @@ import org.apache.catalina.startup.ClassLoaderFactory.RepositoryType;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-/**
+/** 与开始/关闭shell脚本交互的主类，因此如果要研究启动和关闭的过程，就从这个类开始看起。
  * Bootstrap loader for Catalina.  This application constructs a class loader
  * for use in loading the Catalina internal classes (by accumulating all of the
  * JAR files found in the "server" directory under "catalina.home"), and
@@ -195,7 +195,7 @@ public final class Bootstrap {
         // Set Catalina path
         setCatalinaHome();
         setCatalinaBase();
-
+        // 实例化**ClassLoaders，创建URLClassLoader    
         initClassLoaders();
 
         Thread.currentThread().setContextClassLoader(catalinaLoader);
@@ -395,7 +395,7 @@ public final class Bootstrap {
             // Don't set daemon until init() has completed
             Bootstrap bootstrap = new Bootstrap();// 实例化Bootstrap的一个实例  
             try {
-                bootstrap.init();
+                bootstrap.init();//set一些系统属性、初始化classLoader和Catalina.setParentClassLoader()
             } catch (Throwable t) {
                 handleThrowable(t);
                 t.printStackTrace();
@@ -424,8 +424,8 @@ public final class Bootstrap {
                 daemon.stop();
             } else if (command.equals("start")) {// 处理start命令
                 daemon.setAwait(true);
-                daemon.load(args);
-                daemon.start();
+                daemon.load(args);// 加载配置资源，通过反射调用catalina.load方法，利用catalina.load方法创建digester实例，从而解析conf/server.xml文件
+                daemon.start();// 运行各个组件，容器开始启动
             } else if (command.equals("stop")) {
                 daemon.stopServer(args);
             } else if (command.equals("configtest")) {

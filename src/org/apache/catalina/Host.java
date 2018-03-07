@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
 
-/**
+/** 就是我们所理解的虚拟主机。
  * A <b>Host</b> is a Container that represents a virtual host in the
  * Catalina servlet engine.  It is useful in the following types of scenarios:
  * <ul>

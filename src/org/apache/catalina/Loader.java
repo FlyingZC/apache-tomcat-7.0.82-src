@@ -22,7 +22,7 @@ package org.apache.catalina;
 import java.beans.PropertyChangeListener;
 
 
-/**
+/** 是被Container用来载入各种所需的Class
  * A <b>Loader</b> represents a Java ClassLoader implementation that can
  * be used by a Container to load class files (within a repository associated
  * with the Loader) that are designed to be reloaded upon request, as well as
