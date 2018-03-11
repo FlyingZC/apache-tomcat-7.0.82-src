@@ -725,7 +725,7 @@ public abstract class AbstractEndpoint<S> {
     public final void init() throws Exception {
         testServerCipherSuitesOrderSupport();
         if (bindOnInit) {
-            bind();
+            bind();// 设置线程数、网络连接数
             bindState = BindState.BOUND_ON_INIT;
         }
     }

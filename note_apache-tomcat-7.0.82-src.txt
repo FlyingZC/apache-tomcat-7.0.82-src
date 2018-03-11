@@ -1,0 +1,114 @@
+组件简述：
+Catalina：与开始/关闭shell脚本交互的主类，因此如果要研究启动和关闭的过程，就从这个类开始看起。
+
+Server：是整个Tomcat组件的容器，包含一个或多个Service。
+
+Service：Service是包含Connector和Container的集合，Service用适当的Connector接收用户的请求，再发给相应的Container来处理。
+
+Connector：实现某一协议的连接器，如默认的有实现HTTP、HTTPS、AJP协议的。
+
+Container：可以理解为处理某类型请求的容器，处理的方式一般为把处理请求的处理器包装为Valve对象，并按一定顺序放入类型为Pipeline的管道里。Container有多种子类型：Engine、Host、Context和Wrapper，这几种子类型Container依次包含，处理不同粒度的请求。另外Container里包含一些基础服务，如Loader、Manager和Realm。
+
+Engine：Engine包含Host和Context，接到请求后仍给相应的Host在相应的Context里处理。
+
+Host：就是我们所理解的虚拟主机。
+
+Context：就是我们所部属的具体Web应用的上下文，说白了就是我们的应用，每个请求都在是相应的上下文里处理的。
+
+Wrapper：Wrapper是针对每个Servlet的Container，每个Servlet都有相应的Wrapper来管理。
+
+可以看出Server、Service、Connector、Container、Engine、Host、Context和Wrapper这些核心组件的作用范围是逐层递减，并逐层包含。
+
+下面就是些被Container所用的基础组件：
+
+Loader：是被Container用来载入各种所需的Class。
+
+Manager：是被Container用来管理Session池。
+
+Realm：是用来处理安全里授权与认证。
+
+============
+组件关系
+service直接包含connector(可多个)和containtor(一个)，这好比一个家庭，男主外，女主内。service是房子，connector是男子，主要工作是对外；
+Container是女子，处理家里内部事务。connector和service一起组件一个家庭，住在service这个房子里
+
+===========
+Tomcat会为每个组件进行注册过程，通过Registry管理起来，而Registry是基于JMX来实现的，因此在看组件的init和start过程实际上就是初始化MBean和触发MBean的start方法，
+会大量看到形如：Registry.getRegistry(null, null).invoke(mbeans, "start", false);这样的代码,实际上就是通过JMX管理各种组件的行为和生命期。
+
+===========
+启动时主要流程如下： 
+初始化类加载器：主要初始化Tomcat加载自身类库的StandardClassLoader(commonClassLoader等)。
+
+解析conf/serverl.xml配置文件：使用Digester解析Tomcat的server.xml(SAXReader)，初始化各个组件（包含各个web应用，解析对应的web.xml进行初始化）。
+
+初始化容器：初始化Service的各级容器Container,包括我们Web应用(我们熟悉的Listener,Filter,Servlet等初始化等在这里完成)。
+
+初始化Connector：初始化Service的的Connector
+
+初始化后，等待请求的到来
+
+
+===================================================================
+第四章
+结构图!!!
+
+===================================================================
+第五章 Server组件 和 Service组件
+==========================
+1.查看conf\server.xml配置文件
+
+默认配置的监听器(server.xml中配置的)
+org.apache.catalina.startup.VersionLoggerListener(server.xml中配置的)
+org.apache.catalina.security.SecurityListener(server.xml中配置的)
+org.apache.catalina.core.AprLifecycleListener 
+    在tomcat初始化前,该监听器会尝试初始化APR库,若能初始化成功,则使用APR接收并进行处理;tomcat销毁后对apr清理
+    
+org.apache.catalina.core.JasperListener
+    在tomcat初始化前该监听器会初始化Jasper组件,Jasper是tomcat的JSP编译器核心引擎,用于在web应用启动前初始化Jasper
+ 
+org.apache.catalina.core.JreMemoryLeakPreventionListener
+ 解决jre内存泄露 和 锁文件 的一种措施.该监听器会在tomcat初始化时使用系统类加载器先加载一些类 和 设置缓存属性,以避免内存泄露 和 锁文件.
+ 1.先设置 当前线程的上下文类加载器 为 系统类加载器.加载一些容器导致内存泄露的类 和 解决锁文件
+ 2.最后将当前线程的类加载器 还原为 上下文类加载器
+
+org.apache.catalina.mbeans.GlobalResourcesLifecycleListener
+ 实例化server组件里JNDI资源的MBean,并提交JMX管理.在启动时为JNDI创建MBean,在停止时销毁MBean
+ 
+org.apache.catalina.core.ThreadLocalLeakPreventionListener
+解决ThreadLocal的使用可能带来的内存泄露问题.该监听器会在web应用重加载时 销毁线程池的线程 并 重新创建新线程,避免ThreadLocal内存泄露
+
+NamingContextListener(书中多出的)
+负责server组件内 全局命名资源在不同生命周期的不同操作.在tomcat启动时 创建命名资源,绑定命名资源,在tomcat停止前解绑命名资源,反注册MBean.
+
+==========================
+2.Server组件作用
+(1)提供监听器机制,用于对Tomcat整个生命周期中不同事件进行处理
+(2)提供Tomcat容器全局的命名资源实现
+(3)监听某个端口以接收SHUTDOWN命令
+
+3.tomcat中实现一个生命周期监听器,只需实现LifecycleListener接口即可.
+在lifecycleEvent()方法中对感兴趣的生命周期事件进行处理.
+
+4.tomcat启动初始化时,通过Digester框架将server.xml映射成对象,在server组件中
+创建org.apache.catalina.deploy.NamingResources和NamingContextListener两个对象
+
+
+===================================================================
+第六章 Connector组件
+1.
+JIoEndPoint:套接字接收终端
+(1)负责启动某端口 监听客户端请求,(2)负责接收套接字连接,(3)负责提供一个线程池系统处理接收到的套接字连接
+(4)负责对连接数的控制(5)负责安全与非安全套接字连接的实现等
+
+包含连接数控制器LimitLatch
+Socket接收器Acceptor
+套接字工厂ServerSocketFactory
+任务执行器Executor
+任务定义器SocketProcessor
+
+2.
+LimitLatch : 连接器控制器,测试类TestLimitLatch
+
+
+

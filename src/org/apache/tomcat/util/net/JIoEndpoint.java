@@ -381,7 +381,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
         }
         // Initialize maxConnections
         if (getMaxConnections() == 0) {
-            // User hasn't set a value - use the default
+            // User hasn't set a value - use the default.此值为server.xml的connector元素的属性MaxThreads值，默认200
             setMaxConnections(getMaxThreadsWithExecutor());
         }
 
@@ -394,7 +394,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
             }
         }
 
-        if (serverSocket == null) {
+        if (serverSocket == null) {// 创建serverSocket对象
             try {
                 if (getAddress() == null) {
                     serverSocket = serverSocketFactory.createSocket(getPort(),

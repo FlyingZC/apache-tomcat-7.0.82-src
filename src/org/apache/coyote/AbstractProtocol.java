@@ -407,12 +407,12 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
     // ------------------------------------------------------- Lifecycle methods
 
-    /*
+    /* 1.注册组件JIoEndPoint;2.endpoint.init(),设置work threads的数量，默认为200，并创建serverSocket对象
      * NOTE: There is no maintenance of state or checking for valid transitions
      * within this class. It is expected that the connector will maintain state
      * and prevent invalid state transitions.
      */
-
+    
     @Override
     public void init() throws Exception {
         if (getLog().isInfoEnabled())

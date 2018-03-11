@@ -532,7 +532,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
     }
 
 
-    /**
+    /** 调用pre-startup初始化。这用于允许连接器在Unix操作环境下绑定到受限端口。
      * Invoke a pre-startup initialization. This is used to allow connectors
      * to bind to restricted ports under Unix operating environments.
      */
@@ -553,7 +553,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             executor.init();
         }
 
-        // Initialize our defined Connectors
+        // Initialize our defined Connectors.实例化connector集合,默认两个,对应server.xml的connector元素配置
         synchronized (connectorsLock) {
             for (Connector connector : connectors) {
                 try {
