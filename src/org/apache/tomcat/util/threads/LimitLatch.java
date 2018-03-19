@@ -40,10 +40,10 @@ public class LimitLatch {
 
         @Override
         protected int tryAcquireShared(int ignored) {
-            long newCount = count.incrementAndGet();
-            if (!released && newCount > limit) {
+            long newCount = count.incrementAndGet();// 连接数计数 增加 并 获取
+            if (!released && newCount > limit) {// 连接数大于limit
                 // Limit exceeded
-                count.decrementAndGet();
+                count.decrementAndGet();// 减小 并 获取
                 return -1;
             } else {
                 return 1;
@@ -52,13 +52,13 @@ public class LimitLatch {
 
         @Override
         protected boolean tryReleaseShared(int arg) {
-            count.decrementAndGet();
+            count.decrementAndGet();// 减小并获取
             return true;
         }
     }
 
     private final Sync sync;
-    private final AtomicLong count;
+    private final AtomicLong count;// 连接 计数
     private volatile long limit;
     private volatile boolean released = false;
 
@@ -72,7 +72,7 @@ public class LimitLatch {
         this.sync = new Sync();
     }
 
-    /**
+    /** 返回latch的当前连接数
      * Returns the current count for the latch
      * @return the current count for latch
      */
@@ -80,7 +80,7 @@ public class LimitLatch {
         return count.get();
     }
 
-    /**
+    /**获取当前limit
      * Obtain the current limit.
      */
     public long getLimit() {
@@ -104,7 +104,7 @@ public class LimitLatch {
     }
 
 
-    /**
+    /** 计数器 加操作.当计数超过最大限制值 会阻塞线程
      * Acquires a shared latch if one is available or waits for one if no shared
      * latch is current available.
      */
@@ -115,7 +115,7 @@ public class LimitLatch {
         sync.acquireSharedInterruptibly(1);
     }
 
-    /**
+    /** 计数器 减操作 和 唤醒线程
      * Releases a shared latch, making it available for another thread to use.
      * @return the previous counter value
      */

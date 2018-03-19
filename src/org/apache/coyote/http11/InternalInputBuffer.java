@@ -32,7 +32,7 @@ import org.apache.tomcat.util.http.parser.HttpParser;
 import org.apache.tomcat.util.net.AbstractEndpoint;
 import org.apache.tomcat.util.net.SocketWrapper;
 
-/**
+/**InputBuffer的实现，它提供了HTTP请求报头解析和传输解码。
  * Implementation of InputBuffer which provides HTTP request header parsing as
  * well as transfer decoding.
  *

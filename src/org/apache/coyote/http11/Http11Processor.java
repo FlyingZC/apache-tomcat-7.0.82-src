@@ -33,7 +33,7 @@ import org.apache.tomcat.util.net.SocketStatus;
 import org.apache.tomcat.util.net.SocketWrapper;
 
 
-/**
+/** 提供对Http协议通信的处理.包括对套接字的读写和过滤,对http协议的解析以及封装成请求对象,http协议响应对象的生成
  * Processes HTTP requests.
  *
  * @author Remy Maucherat

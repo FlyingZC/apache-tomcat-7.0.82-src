@@ -33,13 +33,13 @@ public abstract class AbstractInputBuffer<S> implements InputBuffer{
      */
     protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
-    /**
+    /** 封装的请求对象
      * Associated Coyote request.
      */
     protected Request request;
 
 
-    /**
+    /** 请求头
      * Headers of the associated request.
      */
     protected MimeHeaders headers;
@@ -57,32 +57,32 @@ public abstract class AbstractInputBuffer<S> implements InputBuffer{
     protected boolean swallowInput;
 
 
-    /**
+    /** 指向当前读取缓冲区的指针。字节数组buf
      * Pointer to the current read buffer.
      */
     protected byte[] buf;
 
 
-    /**
+    /**最后一个有效字节。
      * Last valid byte.
      */
     protected int lastValid;
 
 
-    /**
+    /**在缓冲区中的位置。
      * Position in the buffer.
      */
     protected int pos;
 
 
-    /**
+    /**在缓冲区的头末端的位置，也就是body的开始。
      * Pos of the end of the header in the buffer, which is also the
      * start of the body.
      */
     protected int end;
 
 
-    /**
+    /**潜在的输入缓冲区。
      * Underlying input buffer.
      */
     protected InputBuffer inputStreamInputBuffer;
@@ -173,13 +173,13 @@ public abstract class AbstractInputBuffer<S> implements InputBuffer{
     }
 
 
-    /**
+    /** 解析请求行
      * Implementations are expected to call {@link Request#setStartTime(long)}
      * as soon as the first byte is read from the request.
      */
     public abstract boolean parseRequestLine(boolean useAvailableDataOnly)
         throws IOException;
-    
+    /**解析请求头*/
     public abstract boolean parseHeaders() throws IOException;
     
     protected abstract boolean fill(boolean block) throws IOException; 
@@ -191,7 +191,7 @@ public abstract class AbstractInputBuffer<S> implements InputBuffer{
     // --------------------------------------------------------- Public Methods
 
 
-    /**
+    /** 当关闭连接时调用,回收input buffer
      * Recycle the input buffer. This should be called when closing the 
      * connection.
      */
@@ -214,7 +214,7 @@ public abstract class AbstractInputBuffer<S> implements InputBuffer{
     }
 
 
-    /**
+    /** 结束当前http请求的处理
      * End processing of current HTTP request.
      * Note: All bytes of the current request should have been already 
      * consumed. This method only resets all the pointers so that we are ready

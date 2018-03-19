@@ -53,9 +53,9 @@ public abstract class AbstractEndpoint<S> {
     // -------------------------------------------------------------- Constants
     protected static final StringManager sm = StringManager.getManager("org.apache.tomcat.util.net.res");
 
-    public static interface Handler {
+    public static interface Handler {// 静态内部接口Handler
         /**
-         * Different types of socket states to react upon.
+         * Different types of socket states to react upon.不同类型的套接字状态的反应。
          */
         public enum SocketState {
             // TODO Add a new state to the AsyncStateMachine and remove
@@ -65,32 +65,32 @@ public abstract class AbstractEndpoint<S> {
         }
 
 
-        /**
+        /** 获取与handler关联的GlobalRequestProcessor(全局请求处理器)。
          * Obtain the GlobalRequestProcessor associated with the handler.
          */
         public Object getGlobal();
 
 
-        /**
+        /**回收与处理程序(handler)相关的资源。
          * Recycle resources associated with the handler.
          */
         public void recycle();
     }
 
-    protected enum BindState {
+    protected enum BindState {// 绑定状态
         UNBOUND, BOUND_ON_INIT, BOUND_ON_START
     }
-
+    /**静态内部类,Acceptor(用于接收客户端连接的连接器组件),实现Runnable接口*/
     public abstract static class Acceptor implements Runnable {
-        public enum AcceptorState {
+        public enum AcceptorState {// 定义内部枚举类,Acceptor的状态
             NEW, RUNNING, PAUSED, ENDED
         }
-
+        /**默认 接收状态是 NEW*/
         protected volatile AcceptorState state = AcceptorState.NEW;
-        public final AcceptorState getState() {
+        public final AcceptorState getState() {// 该方法final修饰,不可重写,返回 acceptor的状态
             return state;
         }
-
+        /**线程名*/
         private String threadName;
         protected final void setThreadName(final String threadName) {
             this.threadName = threadName;
@@ -99,36 +99,36 @@ public abstract class AbstractEndpoint<S> {
             return threadName;
         }
     }
-
+    /**初始化 错误 延迟*/
     private static final int INITIAL_ERROR_DELAY = 50;
-    private static final int MAX_ERROR_DELAY = 1600;
+    private static final int MAX_ERROR_DELAY = 1600;// 最大错误延迟
 
     // ----------------------------------------------------------------- Fields
 
 
-    /**
+    /** endpoint的运行状态
      * Running state of the endpoint.
      */
     protected volatile boolean running = false;
 
 
-    /**
+    /**当endpoint处于暂停状态,该值置为true
      * Will be set to true whenever the endpoint is paused.
      */
     protected volatile boolean paused = false;
 
-    /**
+    /**是否使用endpoint内部的executor
      * Are we using an internal executor
      */
     protected volatile boolean internalExecutor = true;
 
 
-    /**
+    /**LimitLatch(连接数控制器),endpoint能处理的连接数
      * counter for nr of connections handled by an endpoint
      */
     private volatile LimitLatch connectionLimitLatch = null;
 
-    /**
+    /**socket属性
      * Socket properties
      */
     protected SocketProperties socketProperties = new SocketProperties();
@@ -136,7 +136,7 @@ public abstract class AbstractEndpoint<S> {
         return socketProperties;
     }
 
-    /**
+    /**socket接收器.用于 接受新连接 并 将其传递给工作线程 的线程。
      * Threads used to accept new connections and pass them to worker threads.
      */
     protected Acceptor[] acceptors;
@@ -144,7 +144,7 @@ public abstract class AbstractEndpoint<S> {
 
     // ----------------------------------------------------------------- Properties
 
-    /**
+    /**当endpoint停止时，等待内部excutor(如果使用)终止的时间。默认值为5000(5秒)。
      * Time to wait for the internal executor (if used) to terminate when the
      * endpoint is stopped in milliseconds. Defaults to 5000 (5 seconds).
      */
@@ -160,7 +160,7 @@ public abstract class AbstractEndpoint<S> {
     }
 
 
-    /**
+    /**Acceptor线程数量
      * Acceptor thread count.
      */
     protected int acceptorThreadCount = 0;
@@ -171,7 +171,7 @@ public abstract class AbstractEndpoint<S> {
     public int getAcceptorThreadCount() { return acceptorThreadCount; }
 
 
-    /**
+    /**acceptor线程的优先级,默认为5
      * Priority of the acceptor threads.
      */
     protected int acceptorThreadPriority = Thread.NORM_PRIORITY;
@@ -186,7 +186,7 @@ public abstract class AbstractEndpoint<S> {
         this.maxConnections = maxCon;
         LimitLatch latch = this.connectionLimitLatch;
         if (latch != null) {
-            // Update the latch that enforces this
+            // Update the latch that enforces this.更新使其生效的闩锁(limitLatch)。
             if (maxCon == -1) {
                 releaseConnectionLatch();
             } else {
@@ -199,7 +199,7 @@ public abstract class AbstractEndpoint<S> {
 
     public int  getMaxConnections() { return this.maxConnections; }
 
-    /**
+    /**返回endpoint当前处理的连接数,(前提是使用LimitLatch,否则返回-1)
      * Return the current count of connections handled by this endpoint, if the
      * connections are counted (which happens when the maximum count of
      * connections is limited), or <code>-1</code> if they are not. This
@@ -221,7 +221,7 @@ public abstract class AbstractEndpoint<S> {
         return -1;
     }
 
-    /**
+    /**外部基于线程池的Executor。
      * External Executor based thread pool.
      */
     private Executor executor = null;
@@ -232,7 +232,7 @@ public abstract class AbstractEndpoint<S> {
     public Executor getExecutor() { return executor; }
 
 
-    /**
+    /**socket端口
      * Server socket port.
      */
     private int port;
@@ -339,7 +339,7 @@ public abstract class AbstractEndpoint<S> {
     }
 
 
-    /**
+    /**工作线程的最大数量
      * Maximum amount of worker threads.
      */
     private int maxThreads = 200;
@@ -764,13 +764,13 @@ public abstract class AbstractEndpoint<S> {
     }
 
 
-    /**
+    /**允许endpoints提供特定的acceptor实现 的钩子。
      * Hook to allow Endpoints to provide a specific Acceptor implementation.
      */
     protected abstract Acceptor createAcceptor();
 
 
-    /**
+    /**停止endpoint,并且停止接收新的连接
      * Pause the endpoint, which will stop it accepting new connections.
      */
     public void pause() {
@@ -780,7 +780,7 @@ public abstract class AbstractEndpoint<S> {
         }
     }
 
-    /**
+    /**恢复endpoint，这将使它开始 再次接受新的连接。
      * Resume the endpoint, which will make it start accepting new connections
      * again.
      */

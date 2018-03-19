@@ -79,7 +79,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
 
     // ------------------------------------------------------------- Properties
 
-    /**
+    /**处理接收的线程
      * Handling of accepted sockets.
      */
     protected Handler handler = null;
@@ -123,7 +123,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
 
     // ------------------------------------------------ Handler Inner Interface
 
-    /**
+    /**用于套接字处理的裸骨接口。每个线程数据将存储在ThreadWithAttributes额外文件夹中，或者在线程本地字段中交替存储。
      * Bare bones interface used for socket processing. Per thread data is to be
      * stored in the ThreadWithAttributes extra folders, or alternately in
      * thread local fields.
@@ -139,7 +139,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
      * Async timeout thread
      */
     protected class AsyncTimeout implements Runnable {
-        /**
+        /**检查异步请求并在没有活动时触发超时的后台线程。
          * The background thread that checks async requests and fires the
          * timeout if there has been no activity.
          */
@@ -182,7 +182,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
 
 
     // --------------------------------------------------- Acceptor Inner Class
-    /**
+    /** 继承自AbstractEndpoint.Acceptor.监听传入的TCP/IP连接并将其交给适当的处理器的 后台线程。监听是否有客户端套接字连接 并接收套接字.再将套接字交由Executor执行.它不断从系统底层读取套接字,做尽可能少的处理,最后扔进线程池.
      * The background thread that listens for incoming TCP/IP connections and
      * hands them off to an appropriate processor.
      */
@@ -196,7 +196,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
             // Loop until we receive a shutdown command
             while (running) {
 
-                // Loop if endpoint is paused
+                // Loop if endpoint is paused.若endpoint暂停,则让线程sleep
                 while (paused && running) {
                     state = AcceptorState.PAUSED;
                     try {
@@ -209,20 +209,20 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                 if (!running) {
                     break;
                 }
-                state = AcceptorState.RUNNING;
+                state = AcceptorState.RUNNING;// 置为运行态
 
                 try {
-                    //if we have reached max connections, wait
+                    //if we have reached max connections, wait.如果我们到达了最大的连接，等待。
                     countUpOrAwaitConnection();
 
                     Socket socket = null;
                     try {
                         // Accept the next incoming connection from the server
-                        // socket
+                        // socket.接受来自服务器套接字的下一个连接。
                         socket = serverSocketFactory.acceptSocket(serverSocket);
                     } catch (IOException ioe) {
                         countDownConnection();
-                        // Introduce delay if necessary
+                        // Introduce delay if necessary。必要时引入延迟
                         errorDelay = handleExceptionWithDelay(errorDelay);
                         // re-throw
                         throw ioe;
@@ -230,12 +230,12 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                     // Successful accept, reset the error delay
                     errorDelay = 0;
 
-                    // Configure the socket
+                    // Configure the socket。配置socket,设置套接字的一些属性
                     if (running && !paused && setSocketOptions(socket)) {
-                        // Hand this socket off to an appropriate processor
-                        if (!processSocket(socket)) {
+                        // Hand this socket off to an appropriate processor.把这个socket交给一个合适的processor。
+                        if (!processSocket(socket)) {// 将接收的套接字 扔进线程池
                             countDownConnection();
-                            // Close socket right away
+                            // Close socket right away.马上关闭socket
                             closeSocket(socket);
                         }
                     } else {
@@ -273,7 +273,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
     // ------------------------------------------- SocketProcessor Inner Class
 
 
-    /**
+    /**这个类相当于Worker，但它只会在外部Executor线程池中使用。将套接字放进线程池前需要定义好任务,而要进行哪些逻辑处理则由socketProcessor定义.
      * This class is the equivalent of the Worker, but will simply use in an
      * external Executor thread pool.
      */
@@ -300,7 +300,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                     SocketState state = SocketState.OPEN;
 
                     try {
-                        // SSL handshake
+                        // SSL handshake.SSL握手
                         serverSocketFactory.handshake(socket.getSocket());
                     } catch (Throwable t) {
                         ExceptionUtils.handleThrowable(t);
@@ -311,7 +311,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                         state = SocketState.CLOSED;
                     }
 
-                    if ((state != SocketState.CLOSED)) {
+                    if ((state != SocketState.CLOSED)) {// 处理套接字
                         if (status == null) {
                             state = handler.process(socket, SocketStatus.OPEN_READ);
                         } else {
@@ -323,9 +323,9 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                         if (log.isTraceEnabled()) {
                             log.trace("Closing socket:"+socket);
                         }
-                        countDownConnection();
+                        countDownConnection();// 连接计数减1
                         try {
-                            socket.getSocket().close();
+                            socket.getSocket().close();// 关闭套接字
                         } catch (IOException e) {
                             // Ignore
                         }
@@ -507,7 +507,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
     }
 
 
-    /**
+    /**从新客户端获得新连接。封装这个套接字，这样就可以跟踪并跟踪其他属性，然后将套接字传递给执行器(executor)进行处理。
      * Process a new connection from a new client. Wraps the socket so
      * keep-alive and other attributes can be tracked and then passes the socket
      * to the executor for processing.
