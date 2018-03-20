@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
-/**
+/**这个类用于表示HTTP消息中的字节数组。它表示所有请求/响应元素。字节/字符转换被延迟和缓存。一切都是可回收的。对象可以表示一个字节[]、一个char[]或一个(子)字符串。所有操作可以以区分大小写的方式进行。
  * This class is used to represent a subarray of bytes in an HTTP message.
  * It represents all request/response elements. The byte/char conversions are
  * delayed and cached. Everything is recyclable.
@@ -37,25 +37,25 @@ import java.util.Locale;
 public final class MessageBytes implements Cloneable, Serializable {
     private static final long serialVersionUID = 1L;
 
-    // primary type ( whatever is set as original value )
+    // primary type ( whatever is set as original value ) 空类型
     private int type = T_NULL;
 
-    public static final int T_NULL = 0;
+    public static final int T_NULL = 0; 
     /** getType() is T_STR if the the object used to create the MessageBytes
-        was a String */
+        was a String .String类型*/
     public static final int T_STR  = 1;
     /** getType() is T_BYTES if the the object used to create the MessageBytes
-        was a byte[] */
+        was a byte[] .byte[]类型*/
     public static final int T_BYTES = 2;
     /** getType() is T_CHARS if the the object used to create the MessageBytes
-        was a char[] */
+        was a char[]. char[]类型*/
     public static final int T_CHARS = 3;
 
     private int hashCode=0;
     // did we computed the hashcode ?
     private boolean hasHashCode=false;
 
-    // Internal objects to represent array + offset, and specific methods
+    // Internal objects to represent array + offset, and specific methods.表示数组+偏移量和特定方法的内部对象
     private final ByteChunk byteC=new ByteChunk();
     private final CharChunk charC=new CharChunk();
 

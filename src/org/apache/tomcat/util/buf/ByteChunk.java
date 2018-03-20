@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
-/*
+/* 不转换为字符 操作原始字节数组
  * In a server it is very important to be able to operate on
  * the original byte[] without converting everything to chars.
  * Some protocols are ASCII only, and some allow different
@@ -179,7 +179,7 @@ public final class ByteChunk implements Cloneable, Serializable {
         hasHashCode = false;
     }
 
-    /**
+    /**把字节流起始 和 结束 位置 设置 好,后面调用toString()时再转换成String
      * Sets the message bytes to the specified subarray of bytes.
      *
      * @param b the ascii bytes
