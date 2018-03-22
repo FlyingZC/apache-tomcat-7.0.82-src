@@ -53,7 +53,7 @@ import org.apache.tomcat.util.net.SocketStatus;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/** 一个请求处理器的实现，它将处理委托给一个Coyote处理器。
  * Implementation of a request processor which delegates the processing to a
  * Coyote processor.
  *
@@ -84,7 +84,7 @@ public class CoyoteAdapter implements Adapter {
     // ----------------------------------------------------------- Constructors
 
 
-    /**
+    /**构建与指定连接器关联的新的CoyoteProcessor。
      * Construct a new CoyoteProcessor associated with the specified connector.
      *
      * @param connector CoyoteConnector that owns this processor
@@ -208,13 +208,13 @@ public class CoyoteAdapter implements Adapter {
 
             req.getRequestProcessor().setWorkerThreadName(Thread.currentThread().getName());
 
-            // Calling the container
+            // Calling the container.调用container
             connector.getService().getContainer().getPipeline().getFirst().event(request, response, request.getEvent());
 
             if (!error && !response.isClosed() && (request.getAttribute(
                     RequestDispatcher.ERROR_EXCEPTION) != null)) {
                 // An unexpected exception occurred while processing the event, so
-                // error should be called
+                // error should be called.
                 request.getEvent().setEventType(CometEvent.EventType.ERROR);
                 request.getEvent().setEventSubType(null);
                 error = true;
@@ -248,7 +248,7 @@ public class CoyoteAdapter implements Adapter {
             return false;
         } finally {
             req.getRequestProcessor().setWorkerThreadName(null);
-            // Recycle the wrapper request and response
+            // Recycle the wrapper request and response.回收request和response对象的内容
             if (error || response.isClosed() || !request.isComet()) {
                 ((Context) request.getMappingData().context).logAccess(
                         request, response,
@@ -441,7 +441,7 @@ public class CoyoteAdapter implements Adapter {
             if (postParseSuccess) {
                 //check valves if we support async
                 request.setAsyncSupported(connector.getService().getContainer().getPipeline().isAsyncSupported());
-                // Calling the container
+                // Calling the container.调用container
                 connector.getService().getContainer().getPipeline().getFirst().invoke(request, response);
 
                 if (request.isComet()) {
@@ -656,7 +656,7 @@ public class CoyoteAdapter implements Adapter {
     // ------------------------------------------------------ Protected Methods
 
 
-    /**
+    /** 解析额外的请求参数。
      * Parse additional request parameters.
      */
     protected boolean postParseRequest(org.apache.coyote.Request req,

@@ -74,7 +74,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
     }
 
 
-    /**
+    /** 解析请求行
      * Read the request line. This function is meant to be used during the
      * HTTP request header parsing. Do NOT attempt to read the request body
      * using it.
@@ -260,7 +260,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
     }
 
 
-    /**
+    /**解析多个请求头
      * Parse the HTTP headers.
      */
     @Override
@@ -271,7 +271,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
                     sm.getString("iib.parseheaders.ise.error"));
         }
 
-        while (parseHeader()) {
+        while (parseHeader()) {// 解析每个请求头
             // Loop until we run out of headers
         }
 

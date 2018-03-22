@@ -49,7 +49,7 @@ public class Connector extends LifecycleMBeanBase  {
     private static final Log log = LogFactory.getLog(Connector.class);
 
 
-    /**
+    /**更换标志以使 门面(facade)能够回收利用。
      * Alternate flag to enable recycling of facades.
      */
     public static final boolean RECYCLE_FACADES =
@@ -64,7 +64,7 @@ public class Connector extends LifecycleMBeanBase  {
 
     public Connector(String protocol) {
         setProtocol(protocol);
-        // Instantiate protocol handler
+        // Instantiate protocol handler.实例化协议处理器,默认是http11Protocol
         try {
             Class<?> clazz = Class.forName(protocolHandlerClassName);// org.apache.coyote.http11.Http11Protocol
             this.protocolHandler = (ProtocolHandler) clazz.newInstance();
@@ -90,7 +90,7 @@ public class Connector extends LifecycleMBeanBase  {
     protected boolean allowTrace = false;
 
 
-    /**
+    /** 请求超时
      * Default timeout for asynchronous requests (ms).
      */
     protected  long asyncTimeout = 10000;
@@ -173,7 +173,7 @@ public class Connector extends LifecycleMBeanBase  {
      */
     protected int maxParameterCount = 10000;
 
-    /**
+    /** post最大长度
      * Maximum size of a POST which will be automatically parsed by the
      * container. 2MB by default.
      */
@@ -218,7 +218,7 @@ public class Connector extends LifecycleMBeanBase  {
     protected ProtocolHandler protocolHandler = null;
 
 
-    /**
+    /** 适配器,连接connector和container
      * Coyote adapter.
      */
     protected Adapter adapter = null;
@@ -582,14 +582,14 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
 
-    /**
+    /**设置连接器使用的Coyote协议。
      * Set the Coyote protocol which will be used by the connector.
      *
      * @param protocol The Coyote protocol name
      */
     public void setProtocol(String protocol) {
 
-        if (AprLifecycleListener.isAprAvailable()) {
+        if (AprLifecycleListener.isAprAvailable()) {// APR库可用
             if ("HTTP/1.1".equals(protocol)) {
                 setProtocolHandlerClassName
                     ("org.apache.coyote.http11.Http11AprProtocol");
@@ -602,7 +602,7 @@ public class Connector extends LifecycleMBeanBase  {
                 setProtocolHandlerClassName
                     ("org.apache.coyote.http11.Http11AprProtocol");
             }
-        } else {
+        } else {// http
             if ("HTTP/1.1".equals(protocol)) {
                 setProtocolHandlerClassName
                     ("org.apache.coyote.http11.Http11Protocol");
@@ -627,7 +627,7 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
 
-    /**
+    /** 连接器使用的 协议处理类 名
      * Set the class name of the Coyote protocol handler which will be used
      * by the connector.
      *
@@ -873,7 +873,7 @@ public class Connector extends LifecycleMBeanBase  {
     // --------------------------------------------------------- Public Methods
 
 
-    /**
+    /** 创建request对象,并设置request持有该connector
      * Create (or allocate) and return a Request object suitable for
      * specifying the contents of a Request to the responsible Container.
      */
@@ -886,7 +886,7 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
 
-    /**
+    /** 创建response
      * Create (or allocate) and return a Response object suitable for
      * receiving the contents of a Response from the responsible Container.
      */
@@ -927,7 +927,7 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
 
-    /**
+    /** 暂停连接器
      * Pause the connector.
      */
     public void pause() {
@@ -940,8 +940,8 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
 
-    /**
-     * Pause the connector.
+    /**重启连接器
+     * resume the connector.
      */
     public void resume() {
         try {
@@ -952,7 +952,7 @@ public class Connector extends LifecycleMBeanBase  {
         }
     }
 
-
+    /**内部初始化操作*/
     @Override
     protected void initInternal() throws LifecycleException {
 
@@ -987,7 +987,7 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
 
-    /**
+    /** 内部start操作.通过这个连接器开始处理请求。
      * Begin processing requests via this Connector.
      *
      * @exception LifecycleException if a fatal startup error occurs

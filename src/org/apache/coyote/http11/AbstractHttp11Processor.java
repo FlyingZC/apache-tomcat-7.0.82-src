@@ -1021,7 +1021,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                 upgradeInbound == null &&
                 httpUpgradeHandler == null && !endpoint.isPaused()) {
 
-            // Parsing the request header
+            // Parsing the request header.解析请求头
             try {
                 setRequestLineReadTimeout();
 
@@ -1040,7 +1040,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                     // Set this every time in case limit has been changed via JMX
                     request.getMimeHeaders().setLimit(endpoint.getMaxHeaderCount());
                     request.getCookies().setLimit(getMaxCookieCount());
-                    // Currently only NIO will ever return false here
+                    // Currently only NIO will ever return false here.解析请求头
                     if (!getInputBuffer().parseHeaders()) {
                         // We've read part of the request, don't recycle it
                         // instead associate it with the socket

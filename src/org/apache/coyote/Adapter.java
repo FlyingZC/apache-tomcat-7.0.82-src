@@ -18,7 +18,7 @@ package org.apache.coyote;
 
 import org.apache.tomcat.util.net.SocketStatus;
 
-/**
+/**适配器。这表示一个基于coyote的servlet容器的入口点。将connector和container适配起来的基类
  * Adapter. This represents the entry point in a coyote-based servlet container.
  *
  *

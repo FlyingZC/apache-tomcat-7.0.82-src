@@ -27,7 +27,7 @@ import org.apache.tomcat.util.net.SocketStatus;
 import org.apache.tomcat.util.net.SocketWrapper;
 
 
-/**
+/** 所有协议的processor的抽象
  * Common interface for processors of all protocols.
  */
 public interface Processor<S> {

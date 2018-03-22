@@ -273,7 +273,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
     // ------------------------------------------- SocketProcessor Inner Class
 
 
-    /**这个类相当于Worker，但它只会在外部Executor线程池中使用。将套接字放进线程池前需要定义好任务,而要进行哪些逻辑处理则由socketProcessor定义.
+    /**这个类相当于Worker，但它只会在外部Executor线程池中使用。将套接字放进线程池前需要定义好任务,而要进行哪些逻辑处理则由socketProcessor定义.Executor会调用processor
      * This class is the equivalent of the Worker, but will simply use in an
      * external Executor thread pool.
      */
@@ -312,7 +312,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                     }
 
                     if ((state != SocketState.CLOSED)) {// 处理套接字
-                        if (status == null) {
+                        if (status == null) {// 调用handler进行处理
                             state = handler.process(socket, SocketStatus.OPEN_READ);
                         } else {
                             state = handler.process(socket,status);
@@ -483,7 +483,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
     }
 
 
-    /**
+    /** 配置socket
      * Configure the socket.
      */
     protected boolean setSocketOptions(Socket socket) {

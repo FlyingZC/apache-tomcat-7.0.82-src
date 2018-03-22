@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.tomcat.util.res.StringManager;
 
-/**
+/**同样作为java.util.concurrent.ThreadPoolExecutor，但实现更高效。
  * Same as a java.util.concurrent.ThreadPoolExecutor but implements a much more efficient
  * {@link #getSubmittedCount()} method, to be used to properly handle the work queue.
  * If a RejectedExecutionHandler is not specified a default one will be configured
@@ -161,7 +161,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @throws NullPointerException if command or unit is null
      */
     public void execute(Runnable command, long timeout, TimeUnit unit) {
-        submittedCount.incrementAndGet();
+        submittedCount.incrementAndGet();// 请求数加1
         try {
             super.execute(command);
         } catch (RejectedExecutionException rx) {
