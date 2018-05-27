@@ -75,7 +75,7 @@ import org.apache.tomcat.util.modeler.Registry;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/**为Host添加生命周期监听器HostConfig.默认添加,不是由server.xml配置的.该监听器在Web应用部署过程中做了大量工作
  * Startup event listener for a <b>Host</b> that configures the properties
  * of that Host, and the associated defined contexts.
  *

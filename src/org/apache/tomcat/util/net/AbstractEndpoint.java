@@ -813,7 +813,7 @@ public abstract class AbstractEndpoint<S> {
     public abstract boolean getUseComet();
     public abstract boolean getUseCometTimeout();
     public abstract boolean getUsePolling();
-
+    /**创建LimitLatch对象*/
     protected LimitLatch initializeConnectionLatch() {
         if (maxConnections==-1) return null;
         if (connectionLimitLatch==null) {

@@ -74,7 +74,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
     }
 
 
-    /** 解析请求行
+    /** 解析请求行.请求行包括:1.请求方法 2.请求的URI(可能还包含queryString) 3.HTTP版本信息.如GET /servlet/Modernservlet?userName=zz&password=pwdval HTTP/1.1
      * Read the request line. This function is meant to be used during the
      * HTTP request header parsing. Do NOT attempt to read the request body
      * using it.
@@ -90,33 +90,33 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
 
         int start = 0;
 
-        //
+        // 跳过空白行
         // Skipping blank lines
         //
 
         byte chr = 0;
-        do {
+        do {// 先读一次
 
-            // Read new bytes if needed
+            // Read new bytes if needed.如果需要，读取新的字节。
             if (pos >= lastValid) {
                 if (!fill())
                     throw new EOFException(sm.getString("iib.eof.error"));
             }
             // Set the start time once we start reading data (even if it is
-            // just skipping blank lines)
+            // just skipping blank lines).一旦我们开始读取数据(即使只是跳过空白行)，设置 读取的开始时间
             if (request.getStartTime() < 0) {
                 request.setStartTime(System.currentTimeMillis());
             }
-            chr = buf[pos++];
-        } while ((chr == Constants.CR) || (chr == Constants.LF));
+            chr = buf[pos++];// 当前字节,缓冲区中的位置++
+        } while ((chr == Constants.CR) || (chr == Constants.LF));// 若遇到 字符是CR 或LF继续读取,即\r和\n
 
         pos--;
 
-        // Mark the current buffer position
+        // Mark the current buffer position.标记当前缓冲区读取位置
         start = pos;
 
         //
-        // Reading the method name
+        // Reading the method name.读取方法名
         // Method name is a token
         //
 
@@ -132,7 +132,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
 
             // Spec says method name is a token followed by a single SP but
             // also be tolerant of multiple SP and/or HT.
-            if (buf[pos] == Constants.SP || buf[pos] == Constants.HT) {
+            if (buf[pos] == Constants.SP || buf[pos] == Constants.HT) {// 空格 或 \t
                 space = true;
                 request.method().setBytes(buf, start, pos - start);
             } else if (!HttpParser.isToken(buf[pos])) {
@@ -143,7 +143,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
 
         }
 
-        // Spec says single SP but also be tolerant of multiple SP and/or HT
+        // Spec says single SP but also be tolerant of multiple SP and/or HT.Spec表示单个SP，但也可以接受多个SP和/或HT。(跳过多个空格或\t)
         while (space) {
             // Read new bytes if needed
             if (pos >= lastValid) {
@@ -281,7 +281,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
     }
 
 
-    /**
+    /**解析请求头
      * Parse an HTTP header.
      *
      * @return false after reading a blank line (which indicates that the
@@ -319,7 +319,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
 
         }
 
-        // Mark the current buffer position
+        // Mark the current buffer position.当前缓存读取的位置
         int start = pos;
 
         //
@@ -350,7 +350,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
             }
 
             chr = buf[pos];
-            if ((chr >= Constants.A) && (chr <= Constants.Z)) {
+            if ((chr >= Constants.A) && (chr <= Constants.Z)) {// 大写转小写
                 buf[pos] = (byte) (chr - Constants.LC_OFFSET);
             }
 

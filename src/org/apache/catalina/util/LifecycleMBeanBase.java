@@ -30,7 +30,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.modeler.Registry;
 import org.apache.tomcat.util.res.StringManager;
-
+/**tomcat核心组件的默认实现均继承自该类.该类不但负责组件各个状态的转换和事件处理,还将组件自身注册为MBean.以便通过tomcat管理工具进行动态状态维护*/
 public abstract class LifecycleMBeanBase extends LifecycleBase
         implements MBeanRegistration {
 

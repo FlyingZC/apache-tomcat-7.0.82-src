@@ -23,7 +23,7 @@ import org.apache.tomcat.util.digester.Digester;
 import org.apache.tomcat.util.digester.RuleSetBase;
 
 
-/**
+/**使用digester创建Engine实例
  * <p><strong>RuleSet</strong> for processing the contents of a
  * Engine definition element.  This <code>RuleSet</code> does NOT include
  * any rules for nested Host elements, which should be added via instances of
@@ -90,17 +90,17 @@ public class EngineRuleSet extends RuleSetBase {
         
         digester.addObjectCreate(prefix + "Engine",
                                  "org.apache.catalina.core.StandardEngine",
-                                 "className");
-        digester.addSetProperties(prefix + "Engine");
+                                 "className");// 创建Engine实例
+        digester.addSetProperties(prefix + "Engine");// 设置属性
         digester.addRule(prefix + "Engine",
                          new LifecycleListenerRule
                          ("org.apache.catalina.startup.EngineConfig",
-                          "engineConfigClass"));
+                          "engineConfigClass"));// 为Engine添加一个 生命周期监听器EngineConfig.这个监听器类是在创建时默认添加的,并非由server.xml配置.该监听器用于打印Engine启动和停止的日志
         digester.addSetNext(prefix + "Engine",
                             "setContainer",
-                            "org.apache.catalina.Container");
+                            "org.apache.catalina.Container");// 通过setContainer()将其添加到Service实例
 
-        //Cluster configuration start
+        //Cluster configuration start.为Engine添加集群配置
         digester.addObjectCreate(prefix + "Engine/Cluster",
                                  null, // MUST be specified in the element
                                  "className");
@@ -109,7 +109,7 @@ public class EngineRuleSet extends RuleSetBase {
                             "setCluster",
                             "org.apache.catalina.Cluster");
         //Cluster configuration end
-
+        // 为Engine添加生命周期监听器.可由server.xml配置.默认未指定
         digester.addObjectCreate(prefix + "Engine/Listener",
                                  null, // MUST be specified in the element
                                  "className");
@@ -118,9 +118,9 @@ public class EngineRuleSet extends RuleSetBase {
                             "addLifecycleListener",
                             "org.apache.catalina.LifecycleListener");
 
-
+        // 为Engine添加Realm安全配置
         digester.addRuleSet(new RealmRuleSet(prefix + "Engine/"));
-
+        // 为Engine添加拦截器Value
         digester.addObjectCreate(prefix + "Engine/Valve",
                                  null, // MUST be specified in the element
                                  "className");

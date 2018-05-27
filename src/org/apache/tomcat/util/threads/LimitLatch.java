@@ -23,7 +23,7 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-/**连接器控制器
+/**连接器控制器.BIO模式下Limit的限制数与线程池的最大线程数密切相关,比例1:1
  * Shared latch that allows the latch to be acquired a limited number of times
  * after which all subsequent requests to acquire the latch will be placed in a
  * FIFO queue until one of the shares is returned.
@@ -37,7 +37,7 @@ public class LimitLatch {
 
         public Sync() {
         }
-
+        // 共享式 获取同步状态.返回大于等于0的值表示成功. 否则表示获取失败
         @Override
         protected int tryAcquireShared(int ignored) {
             long newCount = count.incrementAndGet();// 连接数计数 增加 并 获取
@@ -49,7 +49,7 @@ public class LimitLatch {
                 return 1;
             }
         }
-
+        // 共享式 释放同步状态
         @Override
         protected boolean tryReleaseShared(int arg) {
             count.decrementAndGet();// 减小并获取
@@ -60,7 +60,7 @@ public class LimitLatch {
     private final Sync sync;
     private final AtomicLong count;// 连接 计数
     private volatile long limit;
-    private volatile boolean released = false;
+    private volatile boolean released = false;// 连接全部释放标志
 
     /**
      * Instantiates a LimitLatch object with an initial limit.
@@ -112,7 +112,7 @@ public class LimitLatch {
         if (log.isDebugEnabled()) {
             log.debug("Counting up["+Thread.currentThread().getName()+"] latch="+getCount());
         }
-        sync.acquireSharedInterruptibly(1);
+        sync.acquireSharedInterruptibly(1);// 独占式获取同步状态.若当前线程未获取到同步状态而进入到同步队列中(这个过程中若当前线程被终端,则该方法抛出InterruptedException并返回)
     }
 
     /** 计数器 减操作 和 唤醒线程
@@ -120,7 +120,7 @@ public class LimitLatch {
      * @return the previous counter value
      */
     public long countDown() {
-        sync.releaseShared(0);
+        sync.releaseShared(0);// 共享式的释放同步状态
         long result = getCount();
         if (log.isDebugEnabled()) {
             log.debug("Counting down["+Thread.currentThread().getName()+"] latch="+result);

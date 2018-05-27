@@ -87,7 +87,7 @@ public class HostRuleSet extends RuleSetBase {
      */
     @Override
     public void addRuleInstances(Digester digester) {
-
+        // 创建Host实例
         digester.addObjectCreate(prefix + "Host",
                                  "org.apache.catalina.core.StandardHost",
                                  "className");
@@ -97,15 +97,15 @@ public class HostRuleSet extends RuleSetBase {
         digester.addRule(prefix + "Host",
                          new LifecycleListenerRule
                          ("org.apache.catalina.startup.HostConfig",
-                          "hostConfigClass"));
+                          "hostConfigClass"));// 为Host添加生命周期监听器HostConfig.默认添加,不是由server.xml配置的
         digester.addSetNext(prefix + "Host",
                             "addChild",
-                            "org.apache.catalina.Container");
+                            "org.apache.catalina.Container");// 通过addChild方法将其添加到Engine上
 
         digester.addCallMethod(prefix + "Host/Alias",
-                               "addAlias", 0);
+                               "addAlias", 0);// 通过Alias,Host还支持配置别名
 
-        //Cluster configuration start
+        //Cluster configuration start.为Host添加集群
         digester.addObjectCreate(prefix + "Host/Cluster",
                                  null, // MUST be specified in the element
                                  "className");
@@ -114,7 +114,7 @@ public class HostRuleSet extends RuleSetBase {
                             "setCluster",
                             "org.apache.catalina.Cluster");
         //Cluster configuration end
-
+        // 为Host添加生命周期管理
         digester.addObjectCreate(prefix + "Host/Listener",
                                  null, // MUST be specified in the element
                                  "className");
@@ -122,9 +122,9 @@ public class HostRuleSet extends RuleSetBase {
         digester.addSetNext(prefix + "Host/Listener",
                             "addLifecycleListener",
                             "org.apache.catalina.LifecycleListener");
-
+        // 为Host添加Realm安全配置
         digester.addRuleSet(new RealmRuleSet(prefix + "Host/"));
-
+        // 为Host设置拦截器Value.server.xml中默认添加了AccessLogValve用于记录访问日志
         digester.addObjectCreate(prefix + "Host/Valve",
                                  null, // MUST be specified in the element
                                  "className");

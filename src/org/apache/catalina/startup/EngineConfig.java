@@ -28,7 +28,7 @@ import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/**为Engine添加一个 生命周期监听器EngineConfig.这个监听器类是在创建时默认添加的,并非由server.xml配置.该监听器用于打印Engine启动和停止的日志
  * Startup event listener for a <b>Engine</b> that configures the properties
  * of that Engine, and the associated defined contexts.
  *

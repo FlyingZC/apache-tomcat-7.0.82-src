@@ -104,7 +104,7 @@ import org.apache.tomcat.util.scan.JarFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
-/**
+/**为context添加生命周期监听器ContextCofig,用于详细配置Context,如解析web.xml等
  * Startup event listener for a <b>Context</b> that configures the properties
  * of that Context, and the associated defined servlets.
  *

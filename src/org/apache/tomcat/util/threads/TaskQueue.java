@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
-/**
+/**作为专门设计用来运行线程池执行器的任务队列。任务队列被优化，以正确地利用线程池执行器中的线程。如果使用正常队列，则executor将生成线程。
  * As task queue specifically designed to run with a thread pool executor.
  * The task queue is optimised to properly utilize threads within
  * a thread pool executor. If you use a normal queue, the executor will spawn threads

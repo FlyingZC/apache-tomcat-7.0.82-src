@@ -294,7 +294,7 @@ public class Catalina {
     }
 
 
-    /**
+    /**使用digester解析server.xml
      * Create and configure the Digester we will be using for startup.
      */
     protected Digester createStartDigester() {
@@ -314,19 +314,19 @@ public class Catalina {
         // Configure the actions we will be using, 配置我们将要使用的操作
         digester.addObjectCreate("Server",
                                  "org.apache.catalina.core.StandardServer",
-                                 "className");
-        digester.addSetProperties("Server");
+                                 "className");// 创建Server实例,默认实现类是StandardServer, 可以通过server节点的className属性指定自己的实现,一般不需要
+        digester.addSetProperties("Server");// 设置Server属性
         digester.addSetNext("Server",
                             "setServer",
-                            "org.apache.catalina.Server");
-
+                            "org.apache.catalina.Server");// 调用setServer将Server设置到Catalina对象中.可在本Catalina类中搜索setServer()方法
+        // 创建JNDI实例对象,GlobalNamingResources,并设置其属性.并调用standServer.setGlobalNamingResources()方法装配到server中
         digester.addObjectCreate("Server/GlobalNamingResources",
                                  "org.apache.catalina.deploy.NamingResources");
         digester.addSetProperties("Server/GlobalNamingResources");
         digester.addSetNext("Server/GlobalNamingResources",
                             "setGlobalNamingResources",
                             "org.apache.catalina.deploy.NamingResources");
-
+        // 为Server添加生命周期监听
         digester.addObjectCreate("Server/Listener",
                                  null, // MUST be specified in the element
                                  "className");
@@ -334,7 +334,7 @@ public class Catalina {
         digester.addSetNext("Server/Listener",
                             "addLifecycleListener",
                             "org.apache.catalina.LifecycleListener");
-
+        // 创建service实例,创建完成后,通过addService()添加到server中
         digester.addObjectCreate("Server/Service",
                                  "org.apache.catalina.core.StandardService",
                                  "className");
@@ -342,7 +342,7 @@ public class Catalina {
         digester.addSetNext("Server/Service",
                             "addService",
                             "org.apache.catalina.Service");
-
+        // 为server添加生命周期监听器.默认未指定监听器,347行的null
         digester.addObjectCreate("Server/Service/Listener",
                                  null, // MUST be specified in the element
                                  "className");
@@ -351,7 +351,7 @@ public class Catalina {
                             "addLifecycleListener",
                             "org.apache.catalina.LifecycleListener");
 
-        //Executor
+        //为service添加Executor
         digester.addObjectCreate("Server/Service/Executor",
                          "org.apache.catalina.core.StandardThreadExecutor",
                          "className");
@@ -361,16 +361,16 @@ public class Catalina {
                             "addExecutor",
                             "org.apache.catalina.Executor");
 
-
+        // 为service添加Connector
         digester.addRule("Server/Service/Connector",
                          new ConnectorCreateRule());
         digester.addRule("Server/Service/Connector",
-                         new SetAllPropertiesRule(new String[]{"executor"}));
+                         new SetAllPropertiesRule(new String[]{"executor"}));// 设置属性时,将executor属性排除在外.因为Connector创建时,即ConnectorCreateRule类中,会判断当前是否指定了executor属性.若是,则从Service中查找该名称的executor并设置到Connector中.
         digester.addSetNext("Server/Service/Connector",
                             "addConnector",
                             "org.apache.catalina.connector.Connector");
 
-
+        // 为Connector添加 生命周期监听器.默认未指定
         digester.addObjectCreate("Server/Service/Connector/Listener",
                                  null, // MUST be specified in the element
                                  "className");
@@ -379,7 +379,7 @@ public class Catalina {
                             "addLifecycleListener",
                             "org.apache.catalina.LifecycleListener");
 
-        // Add RuleSets for nested elements
+        // Add RuleSets for nested elements.添加子元素解析规则.这部分指定了Servlet容器相关的各级嵌套子节点的解析规则.且每类嵌套子节点的解析封装为一个RuleSet类(跟进去看).包括GlobalNamingResources,Engine,Context,Cluster的解析
         digester.addRuleSet(new NamingRuleSet("Server/GlobalNamingResources/"));
         digester.addRuleSet(new EngineRuleSet("Server/Service/"));
         digester.addRuleSet(new HostRuleSet("Server/Service/Engine/"));
