@@ -366,7 +366,7 @@ public class HostConfig
             check();
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {
             beforeStart();
-        } else if (event.getType().equals(Lifecycle.START_EVENT)) {
+        } else if (event.getType().equals(Lifecycle.START_EVENT)) {// start事件
             start();
         } else if (event.getType().equals(Lifecycle.STOP_EVENT)) {
             stop();
@@ -513,20 +513,20 @@ public class HostConfig
     }
 
 
-    /**
+    /** 部署分3种形式:1.Context描述文件部署;2.Web目录部署;3.WAR包部署
      * Deploy applications for any directories or WAR files that are found
      * in our "application root" directory.
      */
     protected void deployApps() {
 
-        File appBase = appBase();
+        File appBase = appBase();// 应用根目录
         File configBase = configBase();
         String[] filteredAppPaths = filterAppPaths(appBase.list());
-        // Deploy XML descriptors from configBase
+        // Deploy XML descriptors from configBase.Context.xml描述文件部署;
         deployDescriptors(configBase, configBase.list());
-        // Deploy WARs
+        // Deploy WARs.Web目录部署;
         deployWARs(appBase, filteredAppPaths);
-        // Deploy expanded folders
+        // Deploy expanded folders\.WAR包部署
         deployDirectories(appBase, filteredAppPaths);
 
     }
@@ -600,7 +600,7 @@ public class HostConfig
     }
 
 
-    /**
+    /**Context.xml描述文件部署
      * Deploy XML context descriptors.
      */
     protected void deployDescriptors(File configBase, String[] files) {
@@ -1720,7 +1720,7 @@ public class HostConfig
     }
 
 
-    /**
+    /** Host启动时触发,完成服务器启动过程中的 Web应用部署.需要 Host的deployOnstartup="true"才会在服务器启动时部署web应用.  autoDeploy
      * Process a "start" event for this Host.
      */
     public void start() {
@@ -1745,8 +1745,8 @@ public class HostConfig
             host.setAutoDeploy(false);
         }
 
-        if (host.getDeployOnStartup())
-            deployApps();
+        if (host.getDeployOnStartup())// 需要 Host的deployOnstartup="true"才会在服务器启动时部署web应用.
+            deployApps();// 部署应用
 
     }
 

@@ -32,7 +32,7 @@ import org.apache.coyote.ActionCode;
 import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.res.StringManager;
 
-/**
+/**tomcat错误输出页面
  * <p>Implementation of a Valve that outputs HTML error pages.</p>
  *
  * <p>This Valve should be attached at the Host level, although it will work

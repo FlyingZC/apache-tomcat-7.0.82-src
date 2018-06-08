@@ -1209,7 +1209,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
         // Start our subordinate components, if any.启动下属组件
         Loader loader = getLoaderInternal();
-        if ((loader != null) && (loader instanceof Lifecycle))
+        if ((loader != null) && (loader instanceof Lifecycle))// 若配置了loader则启动
             ((Lifecycle) loader).start();
         logger = null;
         getLogger();
@@ -1217,10 +1217,10 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         if ((manager != null) && (manager instanceof Lifecycle))
             ((Lifecycle) manager).start();
         Cluster cluster = getClusterInternal();
-        if ((cluster != null) && (cluster instanceof Lifecycle))
+        if ((cluster != null) && (cluster instanceof Lifecycle))// 若配置了集群,则启动
             ((Lifecycle) cluster).start();
         Realm realm = getRealmInternal();
-        if ((realm != null) && (realm instanceof Lifecycle))
+        if ((realm != null) && (realm instanceof Lifecycle))// 若配置了安全组件Realm,则启动
             ((Lifecycle) realm).start();
         DirContext resources = getResourcesInternal();
         if ((resources != null) && (resources instanceof Lifecycle))
@@ -1248,14 +1248,14 @@ public abstract class ContainerBase extends LifecycleMBeanBase
                     sm.getString("containerBase.threadedStartFailed"));
         }
 
-        // Start the Valves in our pipeline (including the basic), if any.若有管道,则启动
+        // Start the Valves in our pipeline (including the basic), if any.启动Host持有的Pipeline组件.若有管道,则启动
         if (pipeline instanceof Lifecycle)
             ((Lifecycle) pipeline).start();
 
-
+        // 设置Host状态为STARTING,此时会触发START_EVENT生命周期事件.HostConfig监听该事件,它会扫描Web部署目录.对于部署描述文件,WAR包,目录 会自动创建StandardContext实例,添加到Host并启动
         setState(LifecycleState.STARTING);
 
-        // Start our thread
+        // Start our thread. 启动Host层级的后台任务进程.Cluster后台任务(包括部署变更检测,心跳).Realm后台任务处理.Pipeline中Value的后台任务处理(如果有定时处理任务)
         threadStart();
 
     }
