@@ -869,7 +869,7 @@ public class ContextConfig implements LifecycleListener {
     }
 
 
-    /**
+    /** web应用初始化.解析web.xml文件
      * Process a "contextConfig" event for this Context.
      */
     protected synchronized void configureStart() {

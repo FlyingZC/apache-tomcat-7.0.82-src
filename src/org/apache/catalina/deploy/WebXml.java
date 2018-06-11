@@ -1301,7 +1301,7 @@ public class WebXml {
     }
 
 
-    /**
+    /** 解析web.xml配置
      * Configure a {@link Context} using the stored web.xml representation.
      *
      * @param context   The context to be configured
@@ -1385,7 +1385,7 @@ public class WebXml {
         for (ContextService service : serviceRefs.values()) {
             context.getNamingResources().addService(service);
         }
-        for (ServletDef servlet : servlets.values()) {
+        for (ServletDef servlet : servlets.values()) {// 将Servlet包装成Wrapper
             Wrapper wrapper = context.createWrapper();
             // Description is ignored
             // Display name is ignored

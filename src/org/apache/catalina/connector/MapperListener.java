@@ -39,7 +39,7 @@ import org.apache.tomcat.util.http.mapper.WrapperMappingInfo;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/** 路由映射 监听器
  * Mapper listener.
  *
  * @author Remy Maucherat
@@ -109,7 +109,7 @@ public class MapperListener extends LifecycleMBeanBase
 
         Engine engine = (Engine) connector.getService().getContainer();
         addListeners(engine);
-
+        // 将Host及下面的子容器注册到mapper中
         Container[] conHosts = engine.findChildren();
         for (Container conHost : conHosts) {
             Host host = (Host) conHost;

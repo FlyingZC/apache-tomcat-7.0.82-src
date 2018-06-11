@@ -52,7 +52,7 @@ import org.apache.tomcat.util.buf.StringCache;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/** 一个Server对应多个service. 该类提供一个接口 让其他程序能访问这个Service集合,且维护所包含的所有service的生命周期
  * Standard implementation of the <b>Server</b> interface, available for use
  * (but not required) when deploying and starting Catalina.
  *
@@ -359,17 +359,17 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
     // --------------------------------------------------------- Server Methods
 
 
-    /**
+    /** 向server中添加一个新的service
      * Add a new Service to the set of defined Services.
      *
      * @param service The Service to be added
      */
     @Override
     public void addService(Service service) {
-
+        // service 和 server相互关联
         service.setServer(this);
 
-        synchronized (servicesLock) {
+        synchronized (servicesLock) {// 添加service并启动
             Service results[] = new Service[services.length + 1];
             System.arraycopy(services, 0, results, 0, services.length);
             results[services.length] = service;

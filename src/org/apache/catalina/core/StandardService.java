@@ -132,18 +132,18 @@ public class StandardService extends LifecycleMBeanBase implements Service {
 
         Container oldContainer = this.container;
         if ((oldContainer != null) && (oldContainer instanceof Engine))
-            ((Engine) oldContainer).setService(null);
+            ((Engine) oldContainer).setService(null);// 若有关联的container,去除关联
         this.container = container;
-        if ((this.container != null) && (this.container instanceof Engine))
+        if ((this.container != null) && (this.container instanceof Engine))// 替换新的关联,再初始化 并 开始这个新的Container生命周期
             ((Engine) this.container).setService(this);
         if (getState().isAvailable() && (this.container != null)) {
             try {
-                this.container.start();
+                this.container.start();// 启动新的container
             } catch (LifecycleException e) {
                 // Ignore
             }
         }
-        if (getState().isAvailable() && (oldContainer != null)) {
+        if (getState().isAvailable() && (oldContainer != null)) {// 若这个oldContainer已启动,则停掉
             try {
                 oldContainer.stop();
             } catch (LifecycleException e) {
@@ -231,13 +231,13 @@ public class StandardService extends LifecycleMBeanBase implements Service {
     public void addConnector(Connector connector) {
 
         synchronized (connectorsLock) {
-            connector.setService(this);
+            connector.setService(this);// 设置 关联关系
             Connector results[] = new Connector[connectors.length + 1];
             System.arraycopy(connectors, 0, results, 0, connectors.length);
             results[connectors.length] = connector;
             connectors = results;
 
-            if (getState().isAvailable()) {
+            if (getState().isAvailable()) {// 初始化connector
                 try {
                     connector.start();
                 } catch (LifecycleException e) {

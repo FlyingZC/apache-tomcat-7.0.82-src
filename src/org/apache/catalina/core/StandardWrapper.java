@@ -1096,7 +1096,7 @@ public class StandardWrapper extends ContainerBase
     }
 
 
-    /**
+    /** 创建Servlet实例.获取servletClass,把它交给InstanceManager去创建一个基于servletClass.class的对象
      * Load and initialize an instance of this servlet, if there is not already
      * at least one initialized instance.  This can be used, for example, to
      * load servlets that are marked in the deployment descriptor to be loaded

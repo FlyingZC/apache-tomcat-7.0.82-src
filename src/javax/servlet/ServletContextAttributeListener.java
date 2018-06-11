@@ -18,7 +18,7 @@ package javax.servlet;
 
 import java.util.EventListener;
 
-/**
+/** 当调用servletContext相关的监听
  * Implementations of this interface receive notifications of changes to the
  * attribute list on the servlet context of a web application. To receive
  * notification events, the implementation class must be configured in the
