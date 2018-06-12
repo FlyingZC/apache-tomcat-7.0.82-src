@@ -64,7 +64,7 @@ import org.apache.tomcat.util.modeler.Registry;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/** web应用类加载器.在其启动时创建web应用类加载器(WebappClassLoader),提供background-Process用于Context后台处理.当检测web应用的类文件,jar包发生变更时,重新加载Context
  * Classloader implementation which is specialized for handling web
  * applications in the most efficient way, while being Catalina aware (all
  * accesses to resources are made through the DirContext interface).

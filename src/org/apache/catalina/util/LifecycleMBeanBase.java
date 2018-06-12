@@ -202,7 +202,7 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
     
     
     /**
-     * Not used - NOOP.
+     * Not used - NOOP. NO Operation,空操作;
      */
     @Override
     public final void postDeregister() {

@@ -35,7 +35,7 @@ import org.apache.tomcat.util.net.AbstractEndpoint.Handler.SocketState;
 import org.apache.tomcat.util.security.PrivilegedSetTccl;
 
 
-/** 套接字接收终端(1)负责启动某端口监听客户端请求,(2)负责接收套接字连接,(3)负责提供一个线程池系统处理接收到的套接字连接(4)负责对连接数的控制(5)负责安全与非安全套接字连接的实现等.包含连接数控制器LimitLatch,Socket接收器Acceptor,套接字工厂ServerSocketFactory,任务执行器Executor,任务定义器SocketProcessor
+/** 套接字接收终端(1)负责启动某端口监听客户端请求,(2)负责接收套接字连接,(3)负责提供一个线程池系统处理接收到的套接字连接(4)负责对连接数的控制(5)负责安全与非安全套接字连接的实现等.包含任务定义器SocketProcessor(本类的一个内部类),Acceptor(本类中的一个内部类,继承自AbstractEndpoint.Acceptor),套接字工厂ServerSocketFactory 和其他在父类AbstractEndpoint中声明的组件: 连接数控制器LimitLatch,任务执行器Executor
  * Handle incoming TCP connections.
  *
  * This class implement a simple server model: one listener thread accepts on a socket and
@@ -86,7 +86,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
     public void setHandler(Handler handler ) { this.handler = handler; }
     public Handler getHandler() { return handler; }
 
-    /**
+    /** 套接字工厂
      * Server socket factory.
      */
     protected ServerSocketFactory serverSocketFactory = null;
@@ -139,7 +139,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
      * Async timeout thread
      */
     protected class AsyncTimeout implements Runnable {
-        /**检查异步请求并在没有活动时触发超时的后台线程。
+        /** 检查异步请求并在没有活动时触发超时的后台线程。
          * The background thread that checks async requests and fires the
          * timeout if there has been no activity.
          */
@@ -218,7 +218,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                     Socket socket = null;
                     try {
                         // Accept the next incoming connection from the server
-                        // socket.接受来自服务器套接字的下一个连接。
+                        // socket.这一行会阻塞住 直到接受来自服务器套接字的下一个连接。
                         socket = serverSocketFactory.acceptSocket(serverSocket);
                     } catch (IOException ioe) {
                         countDownConnection();
@@ -273,7 +273,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
     // ------------------------------------------- SocketProcessor Inner Class
 
 
-    /**这个类相当于Worker，但它只会在外部Executor线程池中使用。将套接字放进线程池前需要定义好任务,而要进行哪些逻辑处理则由socketProcessor定义.Executor会调用processor
+    /** 任务定义器.这个类相当于Worker，但它只会在外部Executor线程池中使用。将套接字放进线程池前需要定义好任务,而要进行哪些逻辑处理则由socketProcessor定义.Executor会调用processor
      * This class is the equivalent of the Worker, but will simply use in an
      * external Executor thread pool.
      */
@@ -343,7 +343,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                 } finally {
                     if (launch) {
                         try {
-                            getExecutor().execute(new SocketProcessor(socket, SocketStatus.OPEN_READ));
+                            getExecutor().execute(new SocketProcessor(socket, SocketStatus.OPEN_READ));// 将SocketProcessor任务丢进线程池里执行
                         } catch (RejectedExecutionException x) {
                             log.warn("Socket reprocessing request was rejected for:"+socket,x);
                             try {
@@ -375,11 +375,11 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
     @Override
     public void bind() throws Exception {
 
-        // Initialize thread count defaults for acceptor
+        // Initialize thread count defaults for acceptor.初始化acceptor线程数量,默认1个
         if (acceptorThreadCount == 0) {
             acceptorThreadCount = 1;
         }
-        // Initialize maxConnections
+        // Initialize maxConnections.初始化最大连接数
         if (getMaxConnections() == 0) {
             // User hasn't set a value - use the default.此值为server.xml的connector元素的属性MaxThreads值，默认200
             setMaxConnections(getMaxThreadsWithExecutor());
@@ -425,16 +425,16 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
             running = true;
             paused = false;
 
-            // Create worker collection
+            // Create worker collection.创建ThreadPoolExecutor线程池
             if (getExecutor() == null) {
                 createExecutor();
             }
-
+            // 创建LimitLatch对象
             initializeConnectionLatch();
-
+            // 创建多个Acceptors
             startAcceptorThreads();
 
-            // Start async timeout thread
+            // Start async timeout thread.启动异步超时线程
             Thread timeoutThread = new Thread(new AsyncTimeout(),
                     getName() + "-AsyncTimeout");
             timeoutThread.setPriority(threadPriority);

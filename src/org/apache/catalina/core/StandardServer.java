@@ -359,7 +359,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
     // --------------------------------------------------------- Server Methods
 
 
-    /** 向server中添加一个新的service
+    /** 向server中添加一个新的service.digester在xml解析时会注入这个关系
      * Add a new Service to the set of defined Services.
      *
      * @param service The Service to be added
@@ -752,7 +752,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
 
         globalNamingResources.start();
         
-        // Start our defined Services
+        // Start our defined Services.启动services
         synchronized (servicesLock) {
             for (int i = 0; i < services.length; i++) {
                 services[i].start();
@@ -806,7 +806,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         
         // Register the naming resources
         globalNamingResources.init();
-        
+        // 使用来自 公共和共享类装入器的jar 来填充扩展验证器
         // Populate the extension validator with JARs from common and shared
         // class loaders
         if (getCatalina() != null) {
@@ -835,7 +835,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
                 cl = cl.getParent();
             }
         }
-        // Initialize our defined Services
+        // Initialize our defined Services.调用services的初始化
         for (int i = 0; i < services.length; i++) {
             services[i].init();
         }

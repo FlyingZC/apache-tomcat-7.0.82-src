@@ -438,20 +438,20 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             log.info(sm.getString("standardService.start.name", this.name));
         setState(LifecycleState.STARTING);
 
-        // Start our defined Container first
+        // Start our defined Container first.启动container
         if (container != null) {
             synchronized (container) {
                 container.start();
             }
         }
 
-        synchronized (executors) {
+        synchronized (executors) {// 启动service的多个线程池executors
             for (Executor executor: executors) {
                 executor.start();
             }
         }
 
-        // Start our defined Connectors second
+        // Start our defined Connectors second.启动connectors
         synchronized (connectorsLock) {
             for (Connector connector: connectors) {
                 try {
@@ -532,7 +532,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
     }
 
 
-    /** 调用pre-startup初始化。这用于允许连接器在Unix操作环境下绑定到受限端口。
+    /** service初始化逻辑.service会初始化container,executor线程池 和 connectors.  //调用pre-startup初始化。这用于允许连接器在Unix操作环境下绑定到受限端口。
      * Invoke a pre-startup initialization. This is used to allow connectors
      * to bind to restricted ports under Unix operating environments.
      */
@@ -542,10 +542,10 @@ public class StandardService extends LifecycleMBeanBase implements Service {
         super.initInternal();
         
         if (container != null) {
-            container.init();
+            container.init();// 初始化container.此处应为Engine
         }
 
-        // Initialize any Executors
+        // Initialize any Executors.初始化executors,即tomcat间可共享的线程池
         for (Executor executor : findExecutors()) {
             if (executor instanceof LifecycleMBeanBase) {
                 ((LifecycleMBeanBase) executor).setDomain(getDomain());
@@ -553,7 +553,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             executor.init();
         }
 
-        // Initialize our defined Connectors.实例化connector集合,默认两个,对应server.xml的connector元素配置
+        // Initialize our defined Connectors.初始化connectors,实例化connector集合,默认两个,对应server.xml的connector元素配置
         synchronized (connectorsLock) {
             for (Connector connector : connectors) {
                 try {

@@ -542,7 +542,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
 
     // ------------------------------------------- Connection handler base class
-
+    // 该内部类的主要逻辑是获取HttpProcessor,缓存取 或新建
     protected abstract static class AbstractConnectionHandler<S,P extends Processor<S>>
             implements AbstractEndpoint.Handler {
 
@@ -634,7 +634,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     } else if (processor.isUpgrade()) {
                         state = processor.upgradeDispatch(status);
                     } else {
-                        state = processor.process(wrapper);
+                        state = processor.process(wrapper);// http11Processor.process(socketWrapper)
                     }
 
                     if (state != SocketState.CLOSED && processor.isAsync()) {

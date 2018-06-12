@@ -1229,12 +1229,12 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         // Start our child containers, if any.启动子容器,如果有的话.
         Container children[] = findChildren();
         List<Future<Void>> results = new ArrayList<Future<Void>>();
-        for (int i = 0; i < children.length; i++) {
+        for (int i = 0; i < children.length; i++) {// 提交 启动子容器的任务.并阻塞当前线程等待执行结果
             results.add(startStopExecutor.submit(new StartChild(children[i])));
         }
 
         boolean fail = false;
-        for (Future<Void> result : results) {
+        for (Future<Void> result : results) {// 启动 多个子容器的结果
             try {
                 result.get();
             } catch (Exception e) {
@@ -1575,7 +1575,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
     // -------------------- Background Thread --------------------
 
-    /**
+    /** 启动后台线程，定期检查会话超时。
      * Start the background thread that will periodically check for
      * session timeouts.
      */
@@ -1620,7 +1620,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
     // -------------------------------------- ContainerExecuteDelay Inner Class
 
 
-    /**
+    /** 私有线程类 在一个固定的延迟之后 调用这个容器及其子容器的 backgroundProcess(后台处理)方法。该机制常用于定时扫描web应用变更,进行重新加载.后台任务处理完成后,会触发PERIODIC_EVENT事件
      * Private thread class to invoke the backgroundProcess method
      * of this container and its children after a fixed delay.
      */
@@ -1661,14 +1661,14 @@ public abstract class ContainerBase extends LifecycleMBeanBase
                 }
             }
         }
-
+        /**调用容器 和 子容器的后台处理程序backgroundProcess方法*/
         protected void processChildren(Container container, ClassLoader cl) {
             try {
                 if (container.getLoader() != null) {
                     Thread.currentThread().setContextClassLoader
                         (container.getLoader().getClassLoader());
                 }
-                container.backgroundProcess();
+                container.backgroundProcess();// 容器的backgroundProcess方法
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 log.error("Exception invoking periodic operation: ", t);
@@ -1678,7 +1678,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             Container[] children = container.findChildren();
             for (int i = 0; i < children.length; i++) {
                 if (children[i].getBackgroundProcessorDelay() <= 0) {
-                    processChildren(children[i], cl);
+                    processChildren(children[i], cl);// 孩子的backgroundProcess()方法
                 }
             }
         }

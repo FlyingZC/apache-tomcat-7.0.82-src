@@ -39,7 +39,7 @@ import org.apache.tomcat.util.http.mapper.WrapperMappingInfo;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/** 路由映射 监听器
+/** 路由映射 监听器.监听所有Host,Context,Wrapper组件.在相关组件启动,停止时注册 或移除相关映射
  * Mapper listener.
  *
  * @author Remy Maucherat
@@ -114,7 +114,7 @@ public class MapperListener extends LifecycleMBeanBase
         for (Container conHost : conHosts) {
             Host host = (Host) conHost;
             if (!LifecycleState.NEW.equals(host.getState())) {
-                // Registering the host will register the context and wrappers
+                // Registering the host will register the context and wrappers.注册host将会注册它下面的context和wrappers
                 registerHost(host);
             }
         }

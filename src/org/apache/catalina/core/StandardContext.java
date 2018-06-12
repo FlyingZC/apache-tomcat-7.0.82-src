@@ -5359,7 +5359,7 @@ public class StandardContext extends ContainerBase
         for (ArrayList<Wrapper> list : map.values()) {
             for (Wrapper wrapper : list) {
                 try {
-                    wrapper.load();
+                    wrapper.load();// 加载wrapper
                 } catch (ServletException e) {
                     getLogger().error(sm.getString("standardContext.loadOnStartup.loadException",
                           getName(), wrapper.getName()), StandardWrapper.getRootCause(e));
@@ -5378,7 +5378,7 @@ public class StandardContext extends ContainerBase
     }
 
 
-    /**
+    /** 完成对web应用的初始化工作
      * Start this component and implement the requirements
      * of {@link org.apache.catalina.util.LifecycleBase#startInternal()}.
      *
@@ -5391,7 +5391,7 @@ public class StandardContext extends ContainerBase
         if(log.isDebugEnabled())
             log.debug("Starting " + getBaseName());
 
-        // Send j2ee.state.starting notification
+        // Send j2ee.state.starting notification.发布正在启动的JMX通知,这样可以通过添加NotificationListener来监听web应用的启动
         if (this.getObjectName() != null) {
             Notification notification = new Notification("j2ee.state.starting",
                     this.getObjectName(), sequenceNumber.getAndIncrement());
@@ -5419,7 +5419,7 @@ public class StandardContext extends ContainerBase
                         && !(new File(getBasePath())).isDirectory()) {
                     setResources(new WARDirContext());
                 } else {
-                    setResources(new FileDirContext());
+                    setResources(new FileDirContext());// 管理目录资源,加载资源文件
                 }
             } catch (IllegalArgumentException e) {
                 log.error(sm.getString("standardContext.resourcesInit"), e);
@@ -5432,7 +5432,7 @@ public class StandardContext extends ContainerBase
             }
         }
 
-        if (getLoader() == null) {
+        if (getLoader() == null) {// 创建web应用类加载器
             WebappLoader webappLoader = new WebappLoader(getParentClassLoader());
             webappLoader.setDelegate(getDelegate());
             setLoader(webappLoader);
@@ -5491,7 +5491,7 @@ public class StandardContext extends ContainerBase
                 // Start our subordinate components, if any
                 Loader loader = getLoaderInternal();
                 if ((loader != null) && (loader instanceof Lifecycle))
-                    ((Lifecycle) loader).start();
+                    ((Lifecycle) loader).start();// 启动web应用类加载器(WebappLoader)
 
                 // since the loader just started, the webapp classloader is now
                 // created.
@@ -5515,10 +5515,10 @@ public class StandardContext extends ContainerBase
                 if ((resources != null) && (resources instanceof Lifecycle))
                     ((Lifecycle) resources).start();
 
-                // Notify our interested LifecycleListeners
+                // Notify our interested LifecycleListeners.发布CONFIGURE_START_EVENT事件,contextConfig监听以完成servlet创建
                 fireLifecycleEvent(Lifecycle.CONFIGURE_START_EVENT, null);
 
-                // Start our child containers, if not already started
+                // Start our child containers, if not already started. 启动子容器wrapper
                 for (Container child : findChildren()) {
                     if (!child.getState().isAvailable()) {
                         child.start();
@@ -5526,7 +5526,7 @@ public class StandardContext extends ContainerBase
                 }
 
                 // Start the Valves in our pipeline (including the basic),
-                // if any
+                // if any. 启动管道,context的Pipline
                 if (pipeline instanceof Lifecycle) {
                     ((Lifecycle) pipeline).start();
                 }

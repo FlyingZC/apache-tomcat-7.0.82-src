@@ -977,7 +977,7 @@ public interface Context extends Container {
     public void addWrapperListener(String listener);
 
 
-    /**
+    /** 创建并返回wrapper实例.
      * Factory method to create and return a new Wrapper instance, of
      * the Java implementation class appropriate for this Context
      * implementation.  The constructor of the instantiated Wrapper

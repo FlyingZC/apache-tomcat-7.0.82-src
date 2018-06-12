@@ -75,7 +75,7 @@ import org.apache.tomcat.util.modeler.Registry;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**为Host添加生命周期监听器HostConfig.默认添加,不是由server.xml配置的.该监听器在Web应用部署过程中做了大量工作
+/**为Host添加生命周期监听器HostConfig.默认添加,不是由server.xml配置的.该监听器在Web应用部署过程中做了大量工作.Tomcat通过HostConfig完成appBase目录下web应用的自动部署.HostConfig监听该事件,它会扫描Web部署目录.对于部署描述文件,WAR包,目录 会自动创建StandardContext实例,添加到Host并启动.HostConfig是LifecycleListener的实现,由Catalina默认添加到Host实例上
  * Startup event listener for a <b>Host</b> that configures the properties
  * of that Host, and the associated defined contexts.
  *
@@ -339,7 +339,7 @@ public class HostConfig
     // --------------------------------------------------------- Public Methods
 
 
-    /**
+    /** HostConfig处理的生命周期事件包括 START_EVENT, PERIODIC_EVENT, STOP_EVENT.前两个与web应用部署有关.
      * Process the START event for an associated Host.
      *
      * @param event The lifecycle event that has occurred
@@ -363,11 +363,11 @@ public class HostConfig
 
         // Process the event that has occurred
         if (event.getType().equals(Lifecycle.PERIODIC_EVENT)) {
-            check();
+            check();// 后台处理完成后事件.通过DeployedApplication维护了两个守护资源列表.redeployResources(守护导致应用重新部署的资源)和reloadResources(守护导致应用重新加载的资源).检测资源变更,重新加载或部署并更新最后修改时间
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {
             beforeStart();
         } else if (event.getType().equals(Lifecycle.START_EVENT)) {// start事件
-            start();
+            start();// Host启动时触发,完成服务器启动过程中的 Web应用部署.需要 Host的deployOnstartup="true"才会在服务器启动时部署web应用.  autoDeploy
         } else if (event.getType().equals(Lifecycle.STOP_EVENT)) {
             stop();
         }
@@ -522,11 +522,11 @@ public class HostConfig
         File appBase = appBase();// 应用根目录
         File configBase = configBase();
         String[] filteredAppPaths = filterAppPaths(appBase.list());
-        // Deploy XML descriptors from configBase.Context.xml描述文件部署;
+        // Deploy XML descriptors from configBase.  // 根据Context.xml描述文件部署.<Context docBase="test/myApp" path="/myApp" reloadable="false"><WatchedResource>/WEB-INF/web.xml</WatchedResource></Context>
         deployDescriptors(configBase, configBase.list());
-        // Deploy WARs.Web目录部署;
+        // Deploy WARs. WAR包部署
         deployWARs(appBase, filteredAppPaths);
-        // Deploy expanded folders\.WAR包部署
+        // Deploy expanded folders. Web目录部署
         deployDirectories(appBase, filteredAppPaths);
 
     }
@@ -600,7 +600,7 @@ public class HostConfig
     }
 
 
-    /**Context.xml描述文件部署
+    /**Context.xml描述文件部署.<Context docBase="test/myApp" path="/myApp" reloadable="false"><WatchedResource>/WEB-INF/web.xml</WatchedResource></Context>
      * Deploy XML context descriptors.
      */
     protected void deployDescriptors(File configBase, String[] files) {
@@ -612,7 +612,7 @@ public class HostConfig
         List<Future<?>> results = new ArrayList<Future<?>>();
 
         for (int i = 0; i < files.length; i++) {
-            File contextXml = new File(configBase, files[i]);
+            File contextXml = new File(configBase, files[i]);// 扫描Host配置文件基础目录.对该目录下的每个xml配置文件,由线程池完成解析部署
 
             if (files[i].toLowerCase(Locale.ENGLISH).endsWith(".xml")) {
                 ContextName cn = new ContextName(files[i], true);
@@ -621,7 +621,7 @@ public class HostConfig
                     continue;
 
                 results.add(
-                        es.submit(new DeployDescriptor(this, cn, contextXml)));
+                        es.submit(new DeployDescriptor(this, cn, contextXml)));//由线程池完成解析部署DeployDescriptor
             }
         }
 
@@ -636,7 +636,7 @@ public class HostConfig
     }
 
 
-    /**
+    /** 每个线程 根据context.xml部署应用的逻辑
      * @param cn
      * @param contextXml
      */
@@ -663,7 +663,7 @@ public class HostConfig
             fis = new FileInputStream(contextXml);
             synchronized (digesterLock) {
                 try {
-                    context = (Context) digester.parse(fis);
+                    context = (Context) digester.parse(fis);// 1.使用Digester解析配置文件,创建Context实例
                 } catch (Exception e) {
                     log.error(sm.getString(
                             "hostConfig.deployDescriptor.error",
@@ -673,15 +673,15 @@ public class HostConfig
                     digester.reset();
                 }
             }
-
+            // 2.更新Context实例的名称,路径
             Class<?> clazz = Class.forName(host.getConfigClass());
             LifecycleListener listener =
                 (LifecycleListener) clazz.newInstance();
             context.addLifecycleListener(listener);
 
             context.setConfigFile(contextXml.toURI().toURL());
-            context.setName(cn.getName());
-            context.setPath(cn.getPath());
+            context.setName(cn.getName());// 名称
+            context.setPath(cn.getPath());// 路径
             context.setWebappVersion(cn.getVersion());
             // Add the associated docBase to the redeployed list if it's a WAR
             if (context.getDocBase() != null) {
@@ -709,7 +709,7 @@ public class HostConfig
                 }
             }
 
-            host.addChild(context);
+            host.addChild(context);// 4.将Context添加到Host.若Host已启动,会直接启动Context
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             log.error(sm.getString("hostConfig.deployDescriptor.error",
@@ -747,7 +747,7 @@ public class HostConfig
                 if (unpackWAR) {
                     deployedApp.redeployResources.put(expandedDocBase.getAbsolutePath(),
                             Long.valueOf(expandedDocBase.lastModified()));
-                    addWatchedResources(deployedApp, expandedDocBase.getAbsolutePath(), context);
+                    addWatchedResources(deployedApp, expandedDocBase.getAbsolutePath(), context);// 将context描述文件,web应用目录 及web.xml添加到守护资源.以便文件发生变更时(根据文件 上次修改时间判断),重新部署 或 加载web应用
                 } else {
                     addWatchedResources(deployedApp, null, context);
                 }
@@ -807,7 +807,7 @@ public class HostConfig
 
         ExecutorService es = host.getStartStopExecutor();
         List<Future<?>> results = new ArrayList<Future<?>>();
-
+        // 线程池部署
         for (int i = 0; i < files.length; i++) {
 
             if (files[i].equalsIgnoreCase("META-INF"))
@@ -1165,7 +1165,7 @@ public class HostConfig
     }
 
 
-    /**
+    /** web目录部署.使用时只需将包含web应用所有资源文件 复制到Host指定appBase目录下即可
      * Deploy directories.
      */
     protected void deployDirectories(File appBase, String[] files) {
@@ -1175,21 +1175,21 @@ public class HostConfig
 
         ExecutorService es = host.getStartStopExecutor();
         List<Future<?>> results = new ArrayList<Future<?>>();
-
+        // 对Host的appBase目录(默认为$CATALINA_BASE/webapps)下所有符合条件的目录由线程池完成部署
         for (int i = 0; i < files.length; i++) {
 
-            if (files[i].equalsIgnoreCase("META-INF"))
+            if (files[i].equalsIgnoreCase("META-INF"))//排除
                 continue;
-            if (files[i].equalsIgnoreCase("WEB-INF"))
+            if (files[i].equalsIgnoreCase("WEB-INF"))//排除
                 continue;
             File dir = new File(appBase, files[i]);
-            if (dir.isDirectory()) {
+            if (dir.isDirectory()) {// 对于每个目录的操作
                 ContextName cn = new ContextName(files[i], false);
 
                 if (isServiced(cn.getName()) || deploymentExists(cn.getName()))
                     continue;
 
-                results.add(es.submit(new DeployDirectory(this, cn, dir)));
+                results.add(es.submit(new DeployDirectory(this, cn, dir)));// 每个线程对于每个目录的部署操作
             }
         }
 
@@ -1204,7 +1204,7 @@ public class HostConfig
     }
 
 
-    /**
+    /**每个线程对于web目录的部署操作
      * @param cn
      * @param dir
      */
@@ -1228,7 +1228,7 @@ public class HostConfig
         boolean deployThisXML = isDeployThisXML(dir, cn);
 
         try {
-            if (deployThisXML && xml.exists()) {
+            if (deployThisXML && xml.exists()) {// 存在META-INF/context.xml,则使用digester解析context.xml创建context对象
                 synchronized (digesterLock) {
                     try {
                         context = (Context) digester.parse(xml);
@@ -1308,7 +1308,7 @@ public class HostConfig
                     Long.valueOf(0));
             deployedApp.redeployResources.put(dir.getAbsolutePath(),
                     Long.valueOf(dir.lastModified()));
-            if (deployThisXML && xml.exists()) {
+            if (deployThisXML && xml.exists()) {// 检测文件变更,重新部署
                 if (copyThisXml) {
                     deployedApp.redeployResources.put(
                             xmlCopy.getAbsolutePath(),
@@ -1770,11 +1770,11 @@ public class HostConfig
     }
 
 
-    /**
+    /** 后台处理完成后事件.通过DeployedApplication维护了两个守护资源列表.redeployResources(守护导致应用重新部署的资源)和reloadResources(守护导致应用重新加载的资源).检测资源变更,重新加载或部署并更新最后修改时间
      * Check status of all webapps.
      */
     protected void check() {
-
+        // 当Host的autoDeploy=true才会有热部署
         if (host.getAutoDeploy()) {
             // Check for resources modification to trigger redeployment
             DeployedApplication[] apps =
@@ -1998,7 +1998,7 @@ public class HostConfig
         }
 
         @Override
-        public void run() {
+        public void run() {// 线程池通过xml部署应用的执行逻辑,这里是每个文件部署线程的执行逻辑
             config.deployDescriptor(cn, descriptor);
         }
     }
@@ -2034,7 +2034,7 @@ public class HostConfig
         }
 
         @Override
-        public void run() {
+        public void run() {// 每个线程对于web目录的部署操作
             config.deployDirectory(cn, dir);
         }
     }

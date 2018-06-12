@@ -18,7 +18,7 @@ package org.apache.tomcat.util.threads;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-/**
+/** simpleTask线程工厂
  * Simple task thread factory to use to create threads for an executor implementation.
  * @author fhanik
  *
@@ -36,7 +36,7 @@ public class TaskThreadFactory implements ThreadFactory {
         this.daemon = daemon;
         this.threadPriority = priority;
     }
-
+    /**线程工厂 用于创建并返回线程*/
     @Override
     public Thread newThread(Runnable r) {
         TaskThread t = new TaskThread(group, r, namePrefix + threadNumber.getAndIncrement());

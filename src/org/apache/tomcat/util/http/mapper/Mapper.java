@@ -31,7 +31,7 @@ import org.apache.tomcat.util.buf.CharChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.res.StringManager;
 
-/**
+/** 维护请求链接 与 host,context,wrapper等container的映射
  * Mapper, which implements the servlet API mapping rules (which are derived
  * from the HTTP rules).
  *
@@ -722,7 +722,7 @@ public final class Mapper {
     }
 
 
-    /**
+    /** 负责完成具体的请求路径的匹配
      * Map the specified host name and URI, mutating the given mapping data.
      *
      * @param host Virtual host name

@@ -53,7 +53,7 @@ import org.apache.tomcat.util.net.SocketStatus;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/** 一个请求处理器的实现，它将处理委托给一个Coyote处理器。
+/** 一个请求处理器的实现，它将处理委托给一个Coyote处理器。将connector和container适配起来.当connector收到请求后,先读取请求数据,再调用coyoteAdapter.service()完成请求处理
  * Implementation of a request processor which delegates the processing to a
  * Coyote processor.
  *
@@ -84,7 +84,7 @@ public class CoyoteAdapter implements Adapter {
     // ----------------------------------------------------------- Constructors
 
 
-    /**构建与指定连接器关联的新的CoyoteProcessor。
+    /** 构建与指定连接器关联的新的CoyoteProcessor。
      * Construct a new CoyoteProcessor associated with the specified connector.
      *
      * @param connector CoyoteConnector that owns this processor
@@ -208,7 +208,7 @@ public class CoyoteAdapter implements Adapter {
 
             req.getRequestProcessor().setWorkerThreadName(Thread.currentThread().getName());
 
-            // Calling the container.调用container
+            // Calling the container.!!!调用container
             connector.getService().getContainer().getPipeline().getFirst().event(request, response, request.getEvent());
 
             if (!error && !response.isClosed() && (request.getAttribute(
@@ -399,7 +399,7 @@ public class CoyoteAdapter implements Adapter {
     public void service(org.apache.coyote.Request req,
                         org.apache.coyote.Response res)
         throws Exception {
-
+        // 1.创建request 和 response
         Request request = (Request) req.getNote(ADAPTER_NOTES);
         Response response = (Response) res.getNote(ADAPTER_NOTES);
 
@@ -656,7 +656,7 @@ public class CoyoteAdapter implements Adapter {
     // ------------------------------------------------------ Protected Methods
 
 
-    /** 解析额外的请求参数。
+    /** 解析额外的请求参数。根据请求路径匹配的结果,按照会话等信息获取最终的映射结果(可能结果又多个)
      * Parse additional request parameters.
      */
     protected boolean postParseRequest(org.apache.coyote.Request req,

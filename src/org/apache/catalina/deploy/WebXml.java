@@ -1410,7 +1410,7 @@ public class WebXml {
                 wrapper.addSecurityReference(
                         roleRef.getName(), roleRef.getLink());
             }
-            wrapper.setServletClass(servlet.getServletClass());
+            wrapper.setServletClass(servlet.getServletClass());// 将wrapper与servlet绑定
             MultipartDef multipartdef = servlet.getMultipartDef();
             if (multipartdef != null) {
                 if (multipartdef.getMaxFileSize() != null &&
@@ -1432,7 +1432,7 @@ public class WebXml {
                         servlet.getAsyncSupported().booleanValue());
             }
             wrapper.setOverridable(servlet.isOverridable());
-            context.addChild(wrapper);
+            context.addChild(wrapper);// 将wrapper添加到context中
         }
         for (Entry<String, String> entry : servletMappings.entrySet()) {
             context.addServletMapping(entry.getKey(), entry.getValue());

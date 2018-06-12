@@ -43,7 +43,7 @@ import org.apache.tomcat.util.threads.TaskQueue;
 import org.apache.tomcat.util.threads.TaskThreadFactory;
 import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 /**
- *
+ * endpoint的抽象基类.包含endpoint组成中的Limit, Acceptor(是本类的一个内部类), Executor.(剩余的ServletSocketFactory和SocketProcessor组件在子类中声明)
  * @author fhanik
  * @author Mladen Turk
  * @author Remy Maucherat
@@ -136,7 +136,7 @@ public abstract class AbstractEndpoint<S> {
         return socketProperties;
     }
 
-    /**socket接收器.用于 接受新连接 并 将其传递给工作线程 的线程。
+    /**socket接收器.用于 接受新连接 并 将其传递给工作线程 的线程。是AbstractEndpoint的内部类
      * Threads used to accept new connections and pass them to worker threads.
      */
     protected Acceptor[] acceptors;
@@ -160,7 +160,7 @@ public abstract class AbstractEndpoint<S> {
     }
 
 
-    /**Acceptor线程数量
+    /**Acceptor线程数量,每个线程运行一个AbstractEndpoint.Acceptor实例
      * Acceptor thread count.
      */
     protected int acceptorThreadCount = 0;
@@ -545,7 +545,7 @@ public abstract class AbstractEndpoint<S> {
         internalExecutor = true;
         TaskQueue taskqueue = new TaskQueue();
         TaskThreadFactory tf = new TaskThreadFactory(getName() + "-exec-", daemon, getThreadPriority());
-        executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);
+        executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);// (corePoolSize, maxPoolSize, keepAliveTime, timeUnit, workQueue)
         taskqueue.setParent( (ThreadPoolExecutor) executor);
     }
 
@@ -747,13 +747,13 @@ public abstract class AbstractEndpoint<S> {
         }
         startInternal();
     }
-
+    /**创建多个Acceptors线程并启动*/
     protected final void startAcceptorThreads() {
-        int count = getAcceptorThreadCount();
+        int count = getAcceptorThreadCount();// 默认acceptor线程数量为1
         acceptors = new Acceptor[count];
 
         for (int i = 0; i < count; i++) {
-            acceptors[i] = createAcceptor();
+            acceptors[i] = createAcceptor();// 创建acceptor线程
             String threadName = getName() + "-Acceptor-" + i;
             acceptors[i].setThreadName(threadName);
             Thread t = new Thread(acceptors[i], threadName);

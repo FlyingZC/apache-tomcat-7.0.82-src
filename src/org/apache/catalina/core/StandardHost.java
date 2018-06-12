@@ -792,7 +792,7 @@ public class StandardHost extends ContainerBase implements Host {
     @Override
     protected synchronized void startInternal() throws LifecycleException {
 
-        // Set error report valve
+        // Set error report valve.设置errorValve.用于在服务器处理异常时输出错误页面
         String errorValve = getErrorReportValveClass();
         if ((errorValve != null) && (!errorValve.equals(""))) {
             try {
@@ -816,7 +816,7 @@ public class StandardHost extends ContainerBase implements Host {
                         errorValve), t);
             }
         }
-        super.startInternal();
+        super.startInternal();// 调用父类ContainerBase.startInternal()启动虚拟主机
     }
 
 

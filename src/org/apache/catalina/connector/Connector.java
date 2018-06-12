@@ -204,7 +204,7 @@ public class Connector extends LifecycleMBeanBase  {
     protected boolean useIPVHosts = false;
 
 
-    /**
+    /** 连接器使用的 协议处理类 名
      * Coyote Protocol handler class name.
      * Defaults to the Coyote HTTP/1.1 protocolHandler.
      */
@@ -212,19 +212,19 @@ public class Connector extends LifecycleMBeanBase  {
         "org.apache.coyote.http11.Http11Protocol";
 
 
-    /**协议处理器,如org.apache.coyote.http11.Http11Protocol
+    /** 协议处理器,如org.apache.coyote.http11.Http11Protocol.
      * Coyote protocol handler.
      */
     protected ProtocolHandler protocolHandler = null;
 
 
-    /** 适配器,连接connector和container
+    /** 适配器,连接connector和container.
      * Coyote adapter.
      */
     protected Adapter adapter = null;
 
 
-     /**
+     /** 映射器
       * Mapper.
       */
      protected Mapper mapper = new Mapper();
@@ -982,7 +982,7 @@ public class Connector extends LifecycleMBeanBase  {
                  ("coyoteConnector.protocolHandlerInitializationFailed"), e);
         }
 
-        // Initialize mapper listener 初始化mapper listener
+        // Initialize mapper listener. 初始化mapper listener
         mapperListener.init();
     }
 
@@ -1004,7 +1004,7 @@ public class Connector extends LifecycleMBeanBase  {
         setState(LifecycleState.STARTING);
 
         try {
-            protocolHandler.start();
+            protocolHandler.start();// 启动 协议处理器
         } catch (Exception e) {
             String errPrefix = "";
             if(this.service != null) {
@@ -1016,7 +1016,7 @@ public class Connector extends LifecycleMBeanBase  {
                  ("coyoteConnector.protocolHandlerStartFailed"), e);
         }
 
-        mapperListener.start();
+        mapperListener.start();// 启动 mapperListener
     }
 
 
