@@ -45,63 +45,63 @@ public abstract class AbstractInputBuffer<S> implements InputBuffer{
     protected MimeHeaders headers;
 
 
-    /**
+    /** 是否正在处理header的 状态标志
      * State.
      */
     protected boolean parsingHeader;
 
 
-    /**
+    /** 是否 还要接收 当前关联的连接的数据
      * Swallow input ? (in the case of an expectation)
      */
     protected boolean swallowInput;
 
 
-    /** 指向当前读取缓冲区的指针。字节数组buf
+    /** 用于保存数据的字节数组.指向当前读取缓冲区的指针。字节数组buf
      * Pointer to the current read buffer.
      */
     protected byte[] buf;
 
 
-    /**最后一个有效字节。
+    /**最后一个有效字节.最后一个可用数据的下标
      * Last valid byte.
      */
     protected int lastValid;
 
 
-    /**在缓冲区中的位置。
+    /** 当前读取到的下标.在缓冲区中的位置.
      * Position in the buffer.
      */
     protected int pos;
 
 
-    /**在缓冲区的头末端的位置，也就是body的开始。
+    /** 指向header在buffer尾部的下标.即在缓冲区的header末端的位置,也就是body的开始.
      * Pos of the end of the header in the buffer, which is also the
      * start of the body.
      */
     protected int end;
 
 
-    /**潜在的输入缓冲区。
+    /** 内部包含一个InputBuffer,代理当前对象的一些方法.用于宝露露给外部读取数据的api.潜在的输入缓冲区
      * Underlying input buffer.
      */
     protected InputBuffer inputStreamInputBuffer;
 
 
-    /**
+    /** 所有filter数组
      * Filter library.
      * Note: Filter[0] is always the "chunked" filter.
      */
     protected InputFilter[] filterLibrary;
 
 
-    /**
+    /** 活动的filter数组.当外部用buffer读取数据时,若有filter,则用filter处理
      * Active filters (in order).
      */
     protected InputFilter[] activeFilters;
 
 
-    /**
+    /** 最后一个活动的filter的下标
      * Index of the last active filter.
      */
     protected int lastActiveFilter;
@@ -183,7 +183,7 @@ public abstract class AbstractInputBuffer<S> implements InputBuffer{
     public abstract boolean parseHeaders() throws IOException;
     
     protected abstract boolean fill(boolean block) throws IOException; 
-
+    /**将inputbuf底层用的socket与当前要处理的socket关联起来,一些数据大小限制参数的设置  */
     protected abstract void init(SocketWrapper<S> socketWrapper,
             AbstractEndpoint<S> endpoint) throws IOException;
 
@@ -276,17 +276,17 @@ public abstract class AbstractInputBuffer<S> implements InputBuffer{
 
     // ---------------------------------------------------- InputBuffer Methods
 
-    /**
+    /** 读取数据
      * Read some bytes.
      */
     @Override
     public int doRead(ByteChunk chunk, Request req) 
         throws IOException {
 
-        if (lastActiveFilter == -1)
+        if (lastActiveFilter == -1)// 若没有 活动的filter,inputStreamInputBuffer可直接读取request
             return inputStreamInputBuffer.doRead(chunk, req);
         else
-            return activeFilters[lastActiveFilter].doRead(chunk,req);
+            return activeFilters[lastActiveFilter].doRead(chunk,req);// 否则需要filter链介入
 
     }
 }

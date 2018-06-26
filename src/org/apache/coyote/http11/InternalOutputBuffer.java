@@ -95,7 +95,7 @@ public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
 
 
     // --------------------------------------------------------- Public Methods
-
+    /**将socket的输出流 赋值给InterInputBuffer的outputStream属性*/
     @Override
     public void init(SocketWrapper<Socket> socketWrapper,
             AbstractEndpoint<Socket> endpoint) throws IOException {

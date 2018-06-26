@@ -28,7 +28,7 @@ import javax.servlet.Filter;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/** 代表一个filter的定义.类中的parameters变量存储了在初始化过滤器的时候需要的所有参数，参数解析在解析web.xml的时候进行添加。
  * Representation of a filter definition for a web application, as represented
  * in a <code>&lt;filter&gt;</code> element in the deployment descriptor.
  *

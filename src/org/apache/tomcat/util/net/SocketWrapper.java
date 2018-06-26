@@ -109,7 +109,7 @@ public class SocketWrapper<E> {
         return blockingStatusWriteLock;
     }
     public Object getWriteThreadLock() { return writeThreadLock; }
-
+    /**重置成员变量属性*/
     public void reset(E socket, long timeout) {
         async = false;
         blockingStatus = true;

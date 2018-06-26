@@ -159,7 +159,7 @@ public class Http11Protocol extends AbstractHttp11JsseProtocol<Socket> {
                 Processor<Socket> processor) {
             // NO-OP
         }
-
+        // 创建processor
         @Override
         protected Http11Processor createProcessor() {
             Http11Processor processor = new Http11Processor(

@@ -130,7 +130,7 @@ final class StandardHostValve extends ValveBase {
     public final void invoke(Request request, Response response)
         throws IOException, ServletException {
 
-        // Select the Context to be used for this Request
+        // Select the Context to be used for this Request.获取处理这个request的context对象
         Context context = request.getContext();
         if (context == null) {
             response.sendError

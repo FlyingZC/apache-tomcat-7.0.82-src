@@ -18,7 +18,7 @@ package org.apache.tomcat.util.threads;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-/** simpleTask线程工厂
+/** simpleTask线程工厂.和父类ThreadFactory相比 主要为了使用namePrefix + threadNumber给线程命名(前缀+线程计数)
  * Simple task thread factory to use to create threads for an executor implementation.
  * @author fhanik
  *

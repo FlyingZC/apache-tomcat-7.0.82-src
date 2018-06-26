@@ -43,7 +43,7 @@ import org.apache.catalina.util.InstanceSupport;
 import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.res.StringManager;
 
-/**
+/** 代表一个过滤器链实体，请求在到达对应servlet之前会先 经过该实例拥有的所有filter。
  * Implementation of <code>javax.servlet.FilterChain</code> used to manage
  * the execution of a set of filters for a particular request.  When the
  * set of defined filters has all been executed, the next call to
@@ -104,7 +104,7 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
     private int pos = 0;
 
 
-    /**
+    /** filter总数量
      * The int which gives the current number of filters in the chain.
      */
     private int n = 0;
@@ -208,7 +208,7 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
             internalDoFilter(request,response);
         }
     }
-
+    /**调用filter*/
     private void internalDoFilter(ServletRequest request, 
                                   ServletResponse response)
         throws IOException, ServletException {
@@ -218,7 +218,7 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
             ApplicationFilterConfig filterConfig = filters[pos++];
             Filter filter = null;
             try {
-                filter = filterConfig.getFilter();
+                filter = filterConfig.getFilter();// 获取filter实例
                 support.fireInstanceEvent(InstanceEvent.BEFORE_FILTER_EVENT,
                                           filter, request, response);
                 
@@ -238,7 +238,7 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
                         ("doFilter", filter, classType, args, principal);
                     
                 } else {  
-                    filter.doFilter(request, response, this);
+                    filter.doFilter(request, response, this);// 调用具体filter.doFilter方法
                 }
 
                 support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,
@@ -270,7 +270,7 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
             return;
         }
 
-        // We fell off the end of the chain -- call the servlet instance
+        // We fell off the end of the chain -- call the servlet instance.所有的filter都调用完毕以后调用 对应的 servlet
         try {
             if (ApplicationDispatcher.WRAP_SAME_OBJECT) {
                 lastServicedRequest.set(request);
@@ -300,10 +300,10 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
                                                args,
                                                principal);   
                 } else {  
-                    servlet.service(request, response);
+                    servlet.service(request, response);// 调用对应servlet.service()
                 }
             } else {
-                servlet.service(request, response);
+                servlet.service(request, response);  
             }
             support.fireInstanceEvent(InstanceEvent.AFTER_SERVICE_EVENT,
                                       servlet, request, response);

@@ -172,7 +172,7 @@ public class SocketProperties {
      * Timeout in milliseconds for an unlock to take place.
      */
     protected int unlockTimeout = 250;
-
+    /**设置socket的参数值(从server.xml的Connector节点上获取参数值),如 socket发送,接收的大小.心跳检测等*/
     public void setProperties(Socket socket) throws SocketException{
         if (rxBufSize != null)
             socket.setReceiveBufferSize(rxBufSize.intValue());

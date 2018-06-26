@@ -36,7 +36,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.net.NioEndpoint.KeyAttachment;
-
+/**NioEndpoint对象中维护了一个NioSelectorPool对象，这个NioSelectorPool中又维护了一个BlockPoller线程，这个线程就是基于辅Selector进行NIO的逻辑。以执行servlet后，得到response，往socket中写数据为例，最终写的过程调用NioBlockingSelector的write方法*/
 public class NioBlockingSelector {
 
     private static final Log log = LogFactory.getLog(NioBlockingSelector.class);
@@ -98,19 +98,19 @@ public class NioBlockingSelector {
         try {
             while ( (!timedout) && buf.hasRemaining()) {
                 if (keycount > 0) { //only write if we were registered for a write
-                    int cnt = socket.write(buf); //write the data
+                    int cnt = socket.write(buf); //write the data.直接往socket中写数据  
                     if (cnt == -1)
                         throw new EOFException();
                     written += cnt;
-                    if (cnt > 0) {
+                    if (cnt > 0) {// 写数据成功，直接进入下一次循环，继续写  
                         time = System.currentTimeMillis(); //reset our timeout timer
                         continue; //we successfully wrote, try again without a selector
                     }
-                }
-                try {
-                    if ( att.getWriteLatch()==null || att.getWriteLatch().getCount()==0) att.startWriteLatch(1);
-                    poller.add(att,SelectionKey.OP_WRITE,reference);
-                    if (writeTimeout < 0) {
+                }// 也就是说当socket.write()返回0时，说明网络状态不稳定，这时将socket注册OP_WRITE事件到辅Selector，由BlockPoller线程不断轮询这个辅Selector，直到发现这个socket的写状态恢复了，通过那个倒数计数器，通知Worker线程继续写socket动作。
+                try {// 如果写数据返回值cnt等于0，通常是网络不稳定造成的写数据失败  
+                    if ( att.getWriteLatch()==null || att.getWriteLatch().getCount()==0) att.startWriteLatch(1);// 开始一个倒数计数器   
+                    poller.add(att,SelectionKey.OP_WRITE,reference);// 将socket注册到辅Selector，这里poller就是BlockSelector线程  
+                    if (writeTimeout < 0) {// 阻塞，直至超时时间唤醒，或者在还没有达到超时时间，在BlockSelector中唤醒  
                         att.awaitWriteLatch(Long.MAX_VALUE,TimeUnit.MILLISECONDS);
                     } else {
                         att.awaitWriteLatch(writeTimeout,TimeUnit.MILLISECONDS);
@@ -122,7 +122,7 @@ public class NioBlockingSelector {
                     //we got interrupted, but we haven't received notification from the poller.
                     keycount = 0;
                 }else {
-                    //latch countdown has happened
+                    //latch countdown has happened.还没超时就唤醒，说明网络状态恢复，继续下一次循环，完成写socket 
                     keycount = 1;
                     att.resetWriteLatch();
                 }
@@ -369,7 +369,7 @@ public class NioBlockingSelector {
                             if ( sk.isReadable() ) {
                                 countDown(attachment.getReadLatch());
                             }
-                            if (sk.isWritable()) {
+                            if (sk.isWritable()) {// 发现socket可写状态恢复，将倒数计数器置位，通知Worker线程继续。使用这个辅Selector主要是减少线程间的切换，同时还可减轻主Selector的负担。  
                                 countDown(attachment.getWriteLatch());
                             }
                         }catch (CancelledKeyException ckx) {

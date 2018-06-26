@@ -34,7 +34,7 @@ import org.apache.tomcat.util.buf.ByteChunk;
 public interface InputBuffer {
 
 
-    /** Return from the input stream.
+    /** 从与这个request关联的socket中读取数据到chunk中.Return from the input stream.
         IMPORTANT: the current model assumes that the protocol will 'own' the
         buffer and return a pointer to it in ByteChunk ( i.e. the param will
         have chunk.getBytes()==null before call, and the result after the call ).

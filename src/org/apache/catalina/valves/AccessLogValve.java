@@ -959,7 +959,7 @@ public class AccessLogValve extends ValveBase implements AccessLog {
     @Override
     public void invoke(Request request, Response response) throws IOException,
             ServletException {
-        getNext().invoke(request, response);
+        getNext().invoke(request, response);// 没做事,直接调下一个管道
     }
 
 

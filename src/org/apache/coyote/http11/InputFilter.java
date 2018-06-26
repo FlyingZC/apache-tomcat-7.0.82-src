@@ -23,7 +23,7 @@ import org.apache.coyote.InputBuffer;
 import org.apache.coyote.Request;
 import org.apache.tomcat.util.buf.ByteChunk;
 
-/**
+/** 输入过滤器InputFilter.在读取数据过程中对于额外的操作只需要通过添加不同的过滤器即可实现
  * Input filter interface.
  * 
  * @author Remy Maucherat

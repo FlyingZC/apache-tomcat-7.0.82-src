@@ -998,8 +998,8 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
 
         // Setting up the I/O
         setSocketWrapper(socketWrapper);
-        getInputBuffer().init(socketWrapper, endpoint);
-        getOutputBuffer().init(socketWrapper, endpoint);
+        getInputBuffer().init(socketWrapper, endpoint);// 初始化 输入流.将socket的输入流 赋值给InterInputBuffer的inputStream属性
+        getOutputBuffer().init(socketWrapper, endpoint);// 初始化 输出流
 
         // Flags
         keepAlive = true;
@@ -1021,27 +1021,27 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                 upgradeInbound == null &&
                 httpUpgradeHandler == null && !endpoint.isPaused()) {
 
-            // Parsing the request header.解析请求头
+            // Parsing the request header.
             try {
-                setRequestLineReadTimeout();
+                setRequestLineReadTimeout();// 设置requestLine读取超时
 
-                if (!getInputBuffer().parseRequestLine(keptAlive)) {
-                    if (handleIncompleteRequestLineRead()) {
+                if (!getInputBuffer().parseRequestLine(keptAlive)) {// 解析请求行
+                    if (handleIncompleteRequestLineRead()) {// 读取requestLine失败的处理
                         break;
                     }
                 }
 
-                if (endpoint.isPaused()) {
+                if (endpoint.isPaused()) {// 若endpoint已经停止了.返回503错误
                     // 503 - Service unavailable
                     response.setStatus(503);
                     setErrorState(ErrorState.CLOSE_CLEAN, null);
                 } else {
                     keptAlive = true;
                     // Set this every time in case limit has been changed via JMX
-                    request.getMimeHeaders().setLimit(endpoint.getMaxHeaderCount());
-                    request.getCookies().setLimit(getMaxCookieCount());
+                    request.getMimeHeaders().setLimit(endpoint.getMaxHeaderCount());// 限制请求头 键值对的最大数量
+                    request.getCookies().setLimit(getMaxCookieCount());// 限制cookie长度
                     // Currently only NIO will ever return false here.解析请求头
-                    if (!getInputBuffer().parseHeaders()) {
+                    if (!getInputBuffer().parseHeaders()) {// 解析请求头!!!
                         // We've read part of the request, don't recycle it
                         // instead associate it with the socket
                         openSocket = true;
@@ -1083,11 +1083,11 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                 getAdapter().log(request, response, 0);
             }
 
-            if (!getErrorState().isError()) {
+            if (!getErrorState().isError()) {// 解析没有错误
                 // Setting up filters, and parse some request headers
                 rp.setStage(org.apache.coyote.Constants.STAGE_PREPARE);
                 try {
-                    prepareRequest();
+                    prepareRequest();// 设置过滤器, 协议, 方法, 请求头 等
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     if (getLog().isDebugEnabled()) {
@@ -1112,7 +1112,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
             if (!getErrorState().isError()) {
                 try {
                     rp.setStage(org.apache.coyote.Constants.STAGE_SERVICE);
-                    adapter.service(request, response);
+                    adapter.service(request, response);// http11Processor将socket封装成request,response,再交给adapter做后续处理
                     // Handle when the response was committed before a serious
                     // error occurred.  Throwing a ServletException should both
                     // set the status to 500 and set the errorException.
@@ -1152,7 +1152,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
             // Finish the handling of the request
             rp.setStage(org.apache.coyote.Constants.STAGE_ENDINPUT);
 
-            if (!isAsync() && !comet) {
+            if (!isAsync() && !comet) {// 若不是异步的servlet
                 if (getErrorState().isError()) {
                     // If we know we are closing the connection, don't drain
                     // input. This way uploading a 100GB file doesn't tie up the
@@ -1176,7 +1176,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
             }
             request.updateCounters();
 
-            if (!isAsync() && !comet || getErrorState().isError()) {
+            if (!isAsync() && !comet || getErrorState().isError()) {// 若不是异步的,可以让buffer准备下次请求了
                 if (getErrorState().isIoAllowed()) {
                     getInputBuffer().nextRequest();
                     getOutputBuffer().nextRequest();
@@ -1202,7 +1202,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
 
         if (getErrorState().isError() || endpoint.isPaused()) {
             return SocketState.CLOSED;
-        } else if (isAsync() || comet) {
+        } else if (isAsync() || comet) {// 若是异步的还需要处理.返回LONG,将会维持processor以及在poller上的注册
             return SocketState.LONG;
         } else if (isUpgrade()) {
             return SocketState.UPGRADING;
@@ -1255,7 +1255,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
         if (endpoint.isSSLEnabled()) {
             request.scheme().setString("https");
         }
-        MessageBytes protocolMB = request.protocol();
+        MessageBytes protocolMB = request.protocol();// 设置协议
         if (protocolMB.equals(Constants.HTTP_11)) {
             http11 = true;
             protocolMB.setString(Constants.HTTP_11);
@@ -1329,7 +1329,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
             }
         }
 
-        // Check for a full URI (including protocol://host:port/)
+        // Check for a full URI (including protocol://host:port/). 请求uri
         ByteChunk uriBC = request.requestURI().getByteChunk();
         if (uriBC.startsWithIgnoreCase("http", 0)) {
 
@@ -1356,7 +1356,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
 
         }
 
-        // Input filter setup
+        // Input filter setup. 设置inputFilter
         InputFilter[] inputFilters = getInputBuffer().getFilters();
 
         // Parse transfer-encoding header
@@ -1804,7 +1804,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
      * that need to set comet timeouts.
      */
     protected abstract void setCometTimeouts(SocketWrapper<S> socketWrapper);
-
+    /**结束处理请求*/
     public void endRequest() {
 
         // Finish the handling of the request

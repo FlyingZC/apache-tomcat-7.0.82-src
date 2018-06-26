@@ -550,7 +550,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
         protected RequestGroupInfo global = new RequestGroupInfo();
         protected AtomicLong registerCount = new AtomicLong(0);
-
+        /**ConcurrentHashMap<NioChannel, Http11NioProcessor>此Map维护socket通道与processor的关系.所以若processor一次不能读取到 所需所有数据 就等下一次根据socket找到这个processor继续读取。*/
         protected final Map<S,Processor<S>> connections = new ConcurrentHashMap<S,Processor<S>>();
 
         protected RecycledProcessors<P,S> recycledProcessors =
@@ -570,7 +570,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             recycledProcessors.clear();
         }
 
-
+        /**获取processor(如Http11NioProcessor)并执行processor.process()*/
         @SuppressWarnings("deprecation") // Old HTTP upgrade method has been deprecated
         public SocketState process(SocketWrapper<S> wrapper,
                 SocketStatus status) {
@@ -578,13 +578,13 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                 // Nothing to do. Socket has been closed.
                 return SocketState.CLOSED;
             }
-
+            // 获取包装类的socket.在Nio模式中socket是NioEndpoint.KeyAttachment.NioChannel对象
             S socket = wrapper.getSocket();
             if (socket == null) {
                 // Nothing to do. Socket has been closed.
                 return SocketState.CLOSED;
             }
-
+            // 从socket的连接缓存connections（用于缓存长连接的Socket）中获取Socket对应的Http11Processor
             Processor<S> processor = connections.get(socket);
             if (status == SocketStatus.DISCONNECT && processor == null) {
                 // Nothing to do. Endpoint requested a close and there is no
@@ -592,19 +592,19 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                 return SocketState.CLOSED;
             }
 
-            wrapper.setAsync(false);
+            wrapper.setAsync(false);// 默认不是异步
             ContainerThreadMarker.markAsContainerThread();
 
             try {
-                if (processor == null) {
+                if (processor == null) {// 若连接缓存connections中不存在Socket对应的Http11Processor，则从可以循环使用的recycledProcessors（类型为ConcurrentLinkedQueue）中获取
                     processor = recycledProcessors.poll();
                 }
-                if (processor == null) {
+                if (processor == null) {// 若recycledProcessors中也没有可以使用的Http11Processor，则调用createProcessor方法创建ttp11Processor
                     processor = createProcessor();
                 }
-
+                // 若Connector 标签设置了 SSLEnabled=true 需要给Http11Processor 设置SSL相关的属性(加密)
                 initSsl(wrapper, processor);
-
+                
                 SocketState state = SocketState.CLOSED;
                 do {
                     if (status == SocketStatus.DISCONNECT &&
@@ -613,7 +613,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                         // Don't do this for Comet we need to generate an end
                         // event (see BZ 54022)
                     } else if (processor.isAsync() || state == SocketState.ASYNC_END) {
-                        state = processor.asyncDispatch(status);
+                        state = processor.asyncDispatch(status);// 若processor 是异步的,调用 asyncDispatch 方法处理
                         if (state == SocketState.OPEN) {
                             // release() won't get called so in case this request
                             // takes a long time to process, remove the socket from
@@ -625,7 +625,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                             // loop and call release() which will recycle the
                             // processor (and input buffer) deleting any
                             // pipe-lined data. To avoid this, process it now.
-                            state = processor.process(wrapper);
+                            state = processor.process(wrapper);// 继续处理!!!
                         }
                     } else if (processor.isComet()) {
                         state = processor.event(status);
@@ -634,7 +634,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     } else if (processor.isUpgrade()) {
                         state = processor.upgradeDispatch(status);
                     } else {
-                        state = processor.process(wrapper);// http11Processor.process(socketWrapper)
+                        state = processor.process(wrapper);// 处理同步socket请求.http11Processor.process(socketWrapper)
                     }
 
                     if (state != SocketState.CLOSED && processor.isAsync()) {
@@ -679,14 +679,14 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                 } while (state == SocketState.ASYNC_END ||
                         state == SocketState.UPGRADING ||
                         state == SocketState.UPGRADING_TOMCAT);
-
+                // 下面是socket后续处理
                 if (state == SocketState.LONG) {
                     // In the middle of processing a request/response. Keep the
                     // socket associated with the processor. Exact requirements
                     // depend on type of long poll
                     connections.put(socket, processor);
                     longPoll(wrapper, processor);
-                } else if (state == SocketState.OPEN) {
+                } else if (state == SocketState.OPEN) {// 长连接处理.表示request已经解析完毕，但是还是keepalive的，那么回收processor对象，然后再将channel注册到poller上面去poller继续等待  
                     // In keep-alive but between requests. OK to recycle
                     // processor. Continue to poll for the next request.
                     connections.remove(socket);

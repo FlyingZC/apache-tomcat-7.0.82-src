@@ -87,7 +87,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
     public boolean parseRequestLine(boolean useAvailableDataOnly)
 
         throws IOException {
-
+        // 标记当前缓冲区读取位置.最初从0开始
         int start = 0;
 
         // 跳过空白行
@@ -107,22 +107,22 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
             if (request.getStartTime() < 0) {
                 request.setStartTime(System.currentTimeMillis());
             }
-            chr = buf[pos++];// 当前字节,缓冲区中的位置++
-        } while ((chr == Constants.CR) || (chr == Constants.LF));// 若遇到 字符是CR 或LF继续读取,即\r和\n
-
+            chr = buf[pos++];// 读取当前字节(pos位置的字节)到buf缓冲区中,并将缓冲区中的位置++. chr是byte类型
+        } while ((chr == Constants.CR) || (chr == Constants.LF));// 若遇到 字符是CR 或LF继续读取,即\r和\n代表请求行解析完毕
+        // 由于上面已经解析完了请求行.display面板new String(buf)可以看到完整请求行 GET /servlet/ModernServlet?userName=zz&password=pwdval HTTP/1.1
         pos--;
 
         // Mark the current buffer position.标记当前缓冲区读取位置
         start = pos;
 
-        //
+        // 下面的操作分别解析出请求行中的GET /servlet/ModernServlet?userName=zz&password=pwdval HTTP/1.1  每一个部分,如请求方法GET
         // Reading the method name.读取方法名
         // Method name is a token
         //
 
         boolean space = false;
-
-        while (!space) {
+        
+        while (!space) {// 没遇到空格
 
             // Read new bytes if needed
             if (pos >= lastValid) {
@@ -134,7 +134,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
             // also be tolerant of multiple SP and/or HT.
             if (buf[pos] == Constants.SP || buf[pos] == Constants.HT) {// 空格 或 \t
                 space = true;
-                request.method().setBytes(buf, start, pos - start);
+                request.method().setBytes(buf, start, pos - start);// 请求方法,如 GET
             } else if (!HttpParser.isToken(buf[pos])) {
                 throw new IllegalArgumentException(sm.getString("iib.invalidmethod"));
             }
@@ -143,7 +143,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
 
         }
 
-        // Spec says single SP but also be tolerant of multiple SP and/or HT.Spec表示单个SP，但也可以接受多个SP和/或HT。(跳过多个空格或\t)
+        // Spec says single SP but also be tolerant of multiple SP and/or HT.Spec// 跳过多个空格或\t
         while (space) {
             // Read new bytes if needed
             if (pos >= lastValid) {
@@ -163,12 +163,12 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
         int questionPos = -1;
 
         //
-        // Reading the URI
+        // Reading the URI.解析出请求行中的GET /servlet/ModernServlet?userName=zz&password=pwdval HTTP/1.1  中的URI
         //
 
         boolean eol = false;
 
-        while (!space) {
+        while (!space) {// 读取到空格则结束,没到空格表示还是uri的一部分
 
             // Read new bytes if needed
             if (pos >= lastValid) {
@@ -181,13 +181,13 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
                 space = true;
                 end = pos;
             } else if ((buf[pos] == Constants.CR)
-                       || (buf[pos] == Constants.LF)) {
-                // HTTP/0.9 style request
+                       || (buf[pos] == Constants.LF)) {// \n和 \n
+                // HTTP/0.9 style request  http0.9版本的请求行格式
                 eol = true;
                 space = true;
                 end = pos;
-            } else if ((buf[pos] == Constants.QUESTION) && (questionPos == -1)) {
-                questionPos = pos;
+            } else if ((buf[pos] == Constants.QUESTION) && (questionPos == -1)) {// ?问号
+                questionPos = pos;// 截止到问号new String(buf,start, pos - start)display查看,已经解析出的uri为 /servlet/ModernServlet
             } else if (HttpParser.isNotRequestTarget(buf[pos])) {
                 throw new IllegalArgumentException(sm.getString("iib.invalidRequestTarget"));
             }
@@ -197,7 +197,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
         }
 
         request.unparsedURI().setBytes(buf, start, end - start);
-        if (questionPos >= 0) {
+        if (questionPos >= 0) {// 有 ? 问号
             request.queryString().setBytes(buf, questionPos + 1,
                                            end - questionPos - 1);
             request.requestURI().setBytes(buf, start, questionPos - start);
@@ -206,7 +206,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
         }
 
         // Spec says single SP but also says be tolerant of multiple SP and/or HT
-        while (space) {
+        while (space) {// 跳过空格
             // Read new bytes if needed
             if (pos >= lastValid) {
                 if (!fill())
@@ -223,7 +223,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
         start = pos;
         end = 0;
 
-        //
+        // 解析请求行中的协议,如HTTP/1.1 
         // Reading the protocol
         // Protocol is always "HTTP/" DIGIT "." DIGIT
         //
@@ -235,9 +235,9 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
                     throw new EOFException(sm.getString("iib.eof.error"));
             }
 
-            if (buf[pos] == Constants.CR) {
+            if (buf[pos] == Constants.CR) {// \r
                 end = pos;
-            } else if (buf[pos] == Constants.LF) {
+            } else if (buf[pos] == Constants.LF) {// \n
                 if (end == 0)
                     end = pos;
                 eol = true;
@@ -250,7 +250,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
         }
 
         if ((end - start) > 0) {
-            request.protocol().setBytes(buf, start, end - start);
+            request.protocol().setBytes(buf, start, end - start);// 保存 协议
         } else {
             request.protocol().setString("");
         }
@@ -327,7 +327,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
         // Header name is always US-ASCII
         //
 
-        boolean colon = false;
+        boolean colon = false;// 当前字符是:冒号 吗 标志
         MessageBytes headerValue = null;
 
         while (!colon) {
@@ -338,9 +338,9 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
                     throw new EOFException(sm.getString("iib.eof.error"));
             }
 
-            if (buf[pos] == Constants.COLON) {
+            if (buf[pos] == Constants.COLON) {// : 冒号
                 colon = true;
-                headerValue = headers.addValue(buf, start, pos - start);
+                headerValue = headers.addValue(buf, start, pos - start);// 解析出一个请求头的key
             } else if (!HttpParser.isToken(buf[pos])) {
                 // Non-token characters are illegal in header names
                 // Parsing continues so the error can be reported in context
@@ -362,7 +362,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
         start = pos;
         int realPos = pos;
 
-        //
+        // 读取请求头的值(可以跨越多行)
         // Reading the header value (which can be spanned over multiple lines)
         //
 
@@ -374,7 +374,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
             boolean space = true;
 
             // Skipping spaces
-            while (space) {
+            while (space) {// 忽略空格
 
                 // Read new bytes if needed
                 if (pos >= lastValid) {
@@ -382,7 +382,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
                         throw new EOFException(sm.getString("iib.eof.error"));
                 }
 
-                if ((buf[pos] == Constants.SP) || (buf[pos] == Constants.HT)) {
+                if ((buf[pos] == Constants.SP) || (buf[pos] == Constants.HT)) {// 空格 \t
                     pos++;
                 } else {
                     space = false;
@@ -392,7 +392,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
 
             int lastSignificantChar = realPos;
 
-            // Reading bytes until the end of the line
+            // Reading bytes until the end of the line.读取字节直到一行结束。
             while (!eol) {
 
                 // Read new bytes if needed
@@ -401,9 +401,9 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
                         throw new EOFException(sm.getString("iib.eof.error"));
                 }
 
-                if (buf[pos] == Constants.CR) {
+                if (buf[pos] == Constants.CR) {// \r不管
                     // Skip
-                } else if (buf[pos] == Constants.LF) {
+                } else if (buf[pos] == Constants.LF) {// \n代表一行结束
                     eol = true;
                 } else if (buf[pos] == Constants.SP) {
                     buf[realPos] = buf[pos];
@@ -442,7 +442,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
 
         }
 
-        // Set the header value
+        // Set the header value. 一个请求头的value
         headerValue.setBytes(buf, start, realPos - start);
 
         return true;
@@ -459,7 +459,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
 
     // ------------------------------------------------------ Protected Methods
 
-
+    /**将socket的输入流 赋值给InterInputBuffer的inputStream属性*/
     @Override
     protected void init(SocketWrapper<Socket> socketWrapper,
             AbstractEndpoint<Socket> endpoint) throws IOException {

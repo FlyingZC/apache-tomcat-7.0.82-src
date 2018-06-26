@@ -30,7 +30,7 @@ import org.apache.tomcat.util.net.SecureNioChannel.ApplicationBufferHandler;
 import org.apache.tomcat.util.res.StringManager;
 
 /**
- *
+ * NioChannel是 非阻塞通道.负责将数据读到缓冲区中,或将数据从缓冲区中写入.屏蔽 非SSL(一般TCP连接)与SSL(的差异)读写操作细节的不同.实现java.nio.channels.ByteChannel接口,此接口只有write,read两个操作字节流的方法.
  * Base class for a SocketChannel wrapper used by the endpoint.
  * This way, logic for a SSL socket channel remains the same as for
  * a non SSL, making sure we don't need to code for any exception cases.
@@ -44,9 +44,9 @@ public class NioChannel implements ByteChannel{
             StringManager.getManager("org.apache.tomcat.util.net.res");
 
     protected static ByteBuffer emptyBuf = ByteBuffer.allocate(0);
-
+    /**进行读写操作的nio.SocketChannel*/ 
     protected SocketChannel sc = null;
-
+    /**提供用于操作 待写入SocketChannel缓存区 和 读取SocketChannel的缓冲区的协助方法.对nio.Buffer的封装*/ 
     protected ApplicationBufferHandler bufHandler;
 
     protected Poller poller;

@@ -171,13 +171,13 @@ final class StandardWrapperValve
             request.setComet(true);
         }
 
-        MessageBytes requestPathMB = request.getRequestPathMB();
+        MessageBytes requestPathMB = request.getRequestPathMB();// 请求路径/servlet/HelloServlet
         DispatcherType dispatcherType = DispatcherType.REQUEST;
         if (request.getDispatcherType()==DispatcherType.ASYNC) dispatcherType = DispatcherType.ASYNC;
         request.setAttribute(Globals.DISPATCHER_TYPE_ATTR,dispatcherType);
         request.setAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR,
                 requestPathMB);
-        // Create the filter chain for this request
+        // Create the filter chain for this request.为请求创建filter链
         ApplicationFilterFactory factory =
             ApplicationFilterFactory.getInstance();
         ApplicationFilterChain filterChain =
@@ -186,8 +186,8 @@ final class StandardWrapperValve
         // Reset comet flag value after creating the filter chain
         request.setComet(false);
 
-        // Call the filter chain for this request
-        // NOTE: This also calls the servlet's service() method
+        // Call the filter chain for this request.调用filter链
+        // NOTE: This also calls the servlet's service() method.同时调用servlet.service方法
         try {
             if ((servlet != null) && (filterChain != null)) {
                 // Swallow output if needed
@@ -199,7 +199,7 @@ final class StandardWrapperValve
                         } else if (comet) {
                             filterChain.doFilterEvent(request.getEvent());
                             request.setComet(true);
-                        } else {
+                        } else {// 调用fiterChain来处理 request 和 response
                             filterChain.doFilter(request.getRequest(),
                                     response.getResponse());
                         }
@@ -217,7 +217,7 @@ final class StandardWrapperValve
                         filterChain.doFilterEvent(request.getEvent());
                     } else {
                         filterChain.doFilter
-                            (request.getRequest(), response.getResponse());
+                            (request.getRequest(), response.getResponse());// 调用fiterChain来处理 request 和 response
                     }
                 }
 
@@ -270,7 +270,7 @@ final class StandardWrapperValve
             exception(request, response, e);
         }
 
-        // Release the filter chain (if any) for this request
+        // Release the filter chain (if any) for this request.释放filter链
         if (filterChain != null) {
             if (request.isComet()) {
                 // If this is a Comet request, then the same chain will be used for the
@@ -281,7 +281,7 @@ final class StandardWrapperValve
             }
         }
 
-        // Deallocate the allocated servlet instance
+        // Deallocate the allocated servlet instance.释放servlet链
         try {
             if (servlet != null) {
                 wrapper.deallocate(servlet);
@@ -301,7 +301,7 @@ final class StandardWrapperValve
         try {
             if ((servlet != null) &&
                 (wrapper.getAvailable() == Long.MAX_VALUE)) {
-                wrapper.unload();
+                wrapper.unload();// 卸载wrapper
             }
         } catch (Throwable e) {
             ExceptionUtils.handleThrowable(e);

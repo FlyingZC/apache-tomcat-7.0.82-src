@@ -837,7 +837,7 @@ public class StandardWrapper extends ContainerBase
 
         boolean newInstance = false;
         
-        // If not SingleThreadedModel, return the same instance every time
+        // If not SingleThreadedModel, return the same instance every time.默认不是
         if (!singleThreadModel) {
             // Load and initialize our instance if necessary
             if (instance == null || !instanceInitialized) {
@@ -850,7 +850,7 @@ public class StandardWrapper extends ContainerBase
 
                             // Note: We don't know if the Servlet implements
                             // SingleThreadModel until we have loaded it.
-                            instance = loadServlet();
+                            instance = loadServlet();// 加载servlet.只有加载过才知道是否实现SingleThread
                             newInstance = true;
                             if (!singleThreadModel) {
                                 // For non-STM, increment here to prevent a race
@@ -1178,7 +1178,7 @@ public class StandardWrapper extends ContainerBase
                 }
                 singleThreadModel = true;
             }
-
+            // 初始化servlet
             initServlet(servlet);
 
             fireContainerEvent("load", this);
@@ -1239,7 +1239,7 @@ public class StandardWrapper extends ContainerBase
                     new ServletSecurityElement(secAnnotation));
         }
     }
-
+    /**调用servlet实例的init()*/
     private synchronized void initServlet(Servlet servlet)
             throws ServletException {
         
@@ -1266,7 +1266,7 @@ public class StandardWrapper extends ContainerBase
                     }
                 }
             } else {
-                servlet.init(facade);
+                servlet.init(facade);// servlet 初始化后 会调用一次  init()方法，可以自己复写，也可以不复写
             }
 
             instanceInitialized = true;

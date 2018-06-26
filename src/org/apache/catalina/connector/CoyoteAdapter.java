@@ -399,7 +399,7 @@ public class CoyoteAdapter implements Adapter {
     public void service(org.apache.coyote.Request req,
                         org.apache.coyote.Response res)
         throws Exception {
-        // 1.创建request 和 response
+        // 1.创建request 和 response. 将传入的coyote.Request类型 转成connector.Request类型
         Request request = (Request) req.getNote(ADAPTER_NOTES);
         Response response = (Response) res.getNote(ADAPTER_NOTES);
 
@@ -437,11 +437,11 @@ public class CoyoteAdapter implements Adapter {
             // Parse and set Catalina and configuration specific
             // request parameters
             req.getRequestProcessor().setWorkerThreadName(Thread.currentThread().getName());
-            postParseSuccess = postParseRequest(req, request, res, response);
+            postParseSuccess = postParseRequest(req, request, res, response);// 解析request 包含了对request的相当多的操作
             if (postParseSuccess) {
                 //check valves if we support async
                 request.setAsyncSupported(connector.getService().getContainer().getPipeline().isAsyncSupported());
-                // Calling the container.调用container
+                // Calling the container.调用container.调用StandardEngine的pipeline 处理request和response
                 connector.getService().getContainer().getPipeline().getFirst().invoke(request, response);
 
                 if (request.isComet()) {
@@ -699,12 +699,12 @@ public class CoyoteAdapter implements Adapter {
         // Parse the path parameters. This will:
         //   - strip out the path parameters
         //   - convert the decodedURI to bytes
-        parsePathParameters(req, request);
+        parsePathParameters(req, request);// 解析请求中的路径参数
 
         // URI decoding
         // %xx decoding of the URL
         try {
-            req.getURLDecoder().convert(decodedURI, false);
+            req.getURLDecoder().convert(decodedURI, false);// URI decoding转换
         } catch (IOException ioe) {
             res.setStatus(400);
             res.setMessage("Invalid URI: " + ioe.getMessage());
@@ -712,7 +712,7 @@ public class CoyoteAdapter implements Adapter {
                     request, response, 0, true);
             return false;
         }
-        // Normalization
+        // Normalization 处理请求中的特殊字符.如 // ./ ../ \ 等
         if (!normalize(req.decodedURI())) {
             res.setStatus(400);
             res.setMessage("Invalid URI");
@@ -720,9 +720,9 @@ public class CoyoteAdapter implements Adapter {
                     request, response, 0, true);
             return false;
         }
-        // Character decoding
+        // Character decoding.将URI由字节转换为字符
         convertURI(decodedURI, request);
-        // Check that the URI is still normalized
+        // Check that the URI is still normalized.判断URI中是否包含特殊字符
         if (!checkNormalize(req.decodedURI())) {
             res.setStatus(400);
             res.setMessage("Invalid URI character encoding");
@@ -755,7 +755,7 @@ public class CoyoteAdapter implements Adapter {
         boolean mapRequired = true;
 
         while (mapRequired) {
-            // This will map the the latest version by default
+            // This will map the the latest version by default.匹配请求对应的Host,Context,Wrapper
             connector.getMapper().map(serverName, decodedURI, version,
                                       request.getMappingData());
             request.setContext((Context) request.getMappingData().context);
@@ -792,9 +792,9 @@ public class CoyoteAdapter implements Adapter {
                 }
             }
 
-            // Look for session ID in cookies and SSL session
+            // Look for session ID in cookies and SSL session.从cookie中解析sessionId
             parseSessionCookiesId(req, request);
-            parseSessionSslId(request);
+            parseSessionSslId(request);// 从ssl中解析sessionId
 
             sessionID = request.getRequestedSessionId();
 

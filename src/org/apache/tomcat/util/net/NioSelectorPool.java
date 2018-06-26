@@ -30,7 +30,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 /**
- *
+ * 线程安全 非阻塞 select池。用于 获取有效的selector供socketChannel读写使用.将每个SocketChannel的事件分散注册到不同的selector对象中,避免因大量socketChannel集中注册事件到同一个selector对象而影响服务器性能
  * Thread safe non blocking selector pool
  * @author Filip Hanik
  * @version 1.0
@@ -58,7 +58,7 @@ public class NioSelectorPool {
     protected AtomicInteger active = new AtomicInteger(0);
     protected AtomicInteger spare = new AtomicInteger(0);
     protected ConcurrentLinkedQueue<Selector> selectors =
-        new ConcurrentLinkedQueue<Selector>();
+        new ConcurrentLinkedQueue<Selector>();// selectors池
 
     protected Selector getSharedSelector() throws IOException {
         if (SHARED && SHARED_SELECTOR == null) {
@@ -86,7 +86,7 @@ public class NioSelectorPool {
             return null;
         }
         Selector s = null;
-        try {
+        try {// 创建 Selector
             s = selectors.size()>0?selectors.poll():null;
             if (s == null) {
                 synchronized (Selector.class) {
@@ -140,7 +140,7 @@ public class NioSelectorPool {
             SHARED_SELECTOR = null;
         }
     }
-
+    /**创建nioSelector*/
     public void open() throws IOException {
         enabled = true;
         getSharedSelector();

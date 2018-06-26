@@ -70,7 +70,7 @@ public final class ApplicationFilterFactory {
     // --------------------------------------------------------- Public Methods
 
 
-    /**
+    /** 先是创建ApplicationFilterChain实例，再向filterChain中添加和该servlet匹配的各种filter
      * Return the factory instance.
      */
     public static ApplicationFilterFactory getInstance() {
@@ -112,7 +112,7 @@ public final class ApplicationFilterFactory {
 
         boolean comet = false;
         
-        // Create and initialize a filter chain object
+        // Create and initialize a filter chain object.创建并初始化filterChain
         ApplicationFilterChain filterChain = null;
         if (request instanceof Request) {
             Request req = (Request) request;
@@ -125,24 +125,24 @@ public final class ApplicationFilterFactory {
                 }
             } else {
                 filterChain = (ApplicationFilterChain) req.getFilterChain();
-                if (filterChain == null) {
+                if (filterChain == null) {// 新建ApplicationFilterChain 实例
                     filterChain = new ApplicationFilterChain();
                     req.setFilterChain(filterChain);
                 }
             }
         } else {
-            // Request dispatcher in use
+            // Request dispatcher in use. 
             filterChain = new ApplicationFilterChain();
         }
 
-        filterChain.setServlet(servlet);
+        filterChain.setServlet(servlet);// 关联servlet
 
         filterChain.setSupport
             (((StandardWrapper)wrapper).getInstanceSupport());
 
         // Acquire the filter mappings for this Context
         StandardContext context = (StandardContext) wrapper.getParent();
-        FilterMap filterMaps[] = context.findFilterMaps();
+        FilterMap filterMaps[] = context.findFilterMaps();// 获取所有的filter
 
         // If there are no filter mappings, we are done
         if ((filterMaps == null) || (filterMaps.length == 0))
@@ -151,7 +151,7 @@ public final class ApplicationFilterFactory {
         // Acquire the information we will need to match filter mappings
         String servletName = wrapper.getName();
 
-        // Add the relevant path-mapped filters to this filter chain
+        // Add the relevant path-mapped filters to this filter chain.添加匹配servlet路径的filter
         for (int i = 0; i < filterMaps.length; i++) {
             if (!matchDispatcher(filterMaps[i] ,dispatcher)) {
                 continue;
@@ -159,7 +159,7 @@ public final class ApplicationFilterFactory {
             if (!matchFiltersURL(filterMaps[i], requestPath))
                 continue;
             ApplicationFilterConfig filterConfig = (ApplicationFilterConfig)
-                context.findFilterConfig(filterMaps[i].getFilterName());
+                context.findFilterConfig(filterMaps[i].getFilterName());// 获取 filter对应的 ApplicationFilterConfig 对象
             if (filterConfig == null) {
                 // FIXME - log configuration problem
                 continue;
@@ -176,14 +176,14 @@ public final class ApplicationFilterFactory {
                     ExceptionUtils.handleThrowable(t);
                 }
                 if (isCometFilter) {
-                    filterChain.addFilter(filterConfig);
+                    filterChain.addFilter(filterConfig);// 添加filter
                 }
             } else {
                 filterChain.addFilter(filterConfig);
             }
         }
 
-        // Add filters that match on servlet name second
+        // Add filters that match on servlet name second. 添加匹配 servelt名字的filter
         for (int i = 0; i < filterMaps.length; i++) {
             if (!matchDispatcher(filterMaps[i] ,dispatcher)) {
                 continue;
@@ -213,7 +213,7 @@ public final class ApplicationFilterFactory {
             }
         }
 
-        // Return the completed filter chain
+        // Return the completed filter chain.返回filterChain
         return (filterChain);
 
     }

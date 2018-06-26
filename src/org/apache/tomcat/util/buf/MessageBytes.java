@@ -55,7 +55,7 @@ public final class MessageBytes implements Cloneable, Serializable {
     // did we computed the hashcode ?
     private boolean hasHashCode=false;
 
-    // Internal objects to represent array + offset, and specific methods.表示数组+偏移量和特定方法的内部对象
+    // Internal objects to represent array + offset, and specific methods.表示数组+偏移量和特定方法的内部对象.简单说就是用字节数组先保存,后续再转成字符串
     private final ByteChunk byteC=new ByteChunk();
     private final CharChunk charC=new CharChunk();
 
@@ -114,7 +114,7 @@ public final class MessageBytes implements Cloneable, Serializable {
     }
 
 
-    /**
+    /** 将内容设置为指定的字节子数组。
      * Sets the content to the specified subarray of bytes.
      *
      * @param b the bytes
@@ -123,7 +123,7 @@ public final class MessageBytes implements Cloneable, Serializable {
      */
     public void setBytes(byte[] b, int off, int len) {
         byteC.setBytes( b, off, len );
-        type=T_BYTES;
+        type=T_BYTES;// 类型是 字节数组
         hasStrValue=false;
         hasHashCode=false;
         hasIntValue=false;
@@ -146,7 +146,7 @@ public final class MessageBytes implements Cloneable, Serializable {
         hasLongValue=false;
     }
 
-    /**
+    /** 设置字符串,将类型变更成T_STR
      * Set the content to be a string
      */
     public void setString( String s ) {

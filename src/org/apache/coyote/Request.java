@@ -28,7 +28,7 @@ import org.apache.tomcat.util.http.Cookies;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.http.Parameters;
 
-/**
+/** 这个Request里存放的都是 解析出来的 字节数组 的值
  * This is a low-level, efficient representation of a server request. Most 
  * fields are GC-free, expensive operations are delayed until the  user code 
  * needs the information.
@@ -88,11 +88,11 @@ public final class Request {
     private MessageBytes schemeMB = MessageBytes.newInstance();
 
     private MessageBytes methodMB = MessageBytes.newInstance();
-    private MessageBytes unparsedURIMB = MessageBytes.newInstance();
+    private MessageBytes unparsedURIMB = MessageBytes.newInstance();// 保存未解析的URI.MessageBytes类型
     private MessageBytes uriMB = MessageBytes.newInstance();
     private MessageBytes decodedUriMB = MessageBytes.newInstance();
-    private MessageBytes queryMB = MessageBytes.newInstance();
-    private MessageBytes protoMB = MessageBytes.newInstance();
+    private MessageBytes queryMB = MessageBytes.newInstance();// 请求行里URI的 查询
+    private MessageBytes protoMB = MessageBytes.newInstance();// 请求行里的协议
 
     // remote address/host
     private MessageBytes remoteAddrMB = MessageBytes.newInstance();

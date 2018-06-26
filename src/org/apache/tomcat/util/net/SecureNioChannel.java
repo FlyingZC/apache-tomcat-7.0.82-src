@@ -546,8 +546,8 @@ public class SecureNioChannel extends NioChannel  {
      */
     public static interface ApplicationBufferHandler {
         public ByteBuffer expand(ByteBuffer buffer, int remaining);
-        public ByteBuffer getReadBuffer();
-        public ByteBuffer getWriteBuffer();
+        public ByteBuffer getReadBuffer();// 获取读buffer
+        public ByteBuffer getWriteBuffer();// 获取写buffer
     }
 
     @Override

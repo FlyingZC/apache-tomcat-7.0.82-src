@@ -26,7 +26,7 @@ import org.apache.tomcat.util.res.StringManager;
 /* XXX XXX XXX Need a major rewrite  !!!!
  */
 
-/**
+/** http协议的请求头部.若干个头部在请求对象中被封装成MimeHeaders对象，MimeHeaders对象里面包含了一个链表结构用于存放头部名和头部值。
  * This class is used to contain standard internet message headers,
  * used for SMTP (RFC822) and HTTP (RFC2068) messages as well as for
  * MIME (RFC 2045) applications such as transferring typed data and

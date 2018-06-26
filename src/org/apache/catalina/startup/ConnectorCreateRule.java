@@ -41,7 +41,7 @@ public class ConnectorCreateRule extends Rule {
     // --------------------------------------------------------- Public Methods
 
 
-    /**
+    /** 对应server.xml中 <Connector minSpareThreads="10"  maxThreads="200" port="8080" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="8443" />配置
      * Process the beginning of this element.
      *
      * @param namespace the namespace URI of the matching element, or an 
@@ -59,7 +59,7 @@ public class ConnectorCreateRule extends Rule {
         if ( attributes.getValue("executor")!=null ) {
             ex = svc.getExecutor(attributes.getValue("executor"));
         }
-        Connector con = new Connector(attributes.getValue("protocol"));
+        Connector con = new Connector(attributes.getValue("protocol"));// protocol属性 
         if ( ex != null )  _setExecutor(con,ex);
         
         digester.push(con);

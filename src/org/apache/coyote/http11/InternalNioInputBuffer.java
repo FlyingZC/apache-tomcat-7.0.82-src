@@ -43,7 +43,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
 
     private static final org.apache.juli.logging.Log log =
         org.apache.juli.logging.LogFactory.getLog(InternalNioInputBuffer.class);
-
+    /**默认字符编码*/
     private static final Charset DEFAULT_CHARSET =
         Charset.forName("ISO-8859-1");
 
@@ -95,7 +95,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
     // ----------------------------------------------------------- Constructors
 
 
-    /**
+    /** 关联底层nioChannel,一些配置
      * Alternate constructor.
      */
     public InternalNioInputBuffer(Request request, int headerBufferSize,
@@ -106,7 +106,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
 
         this.headerBufferSize = headerBufferSize;
         this.rejectIllegalHeaderName = rejectIllegalHeaderName;
-
+        
         inputStreamInputBuffer = new SocketInputBuffer();
 
         filterLibrary = new InputFilter[0];
@@ -136,24 +136,24 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
     private int parsingRequestLineQPos = -1;
     private HeaderParsePosition headerParsePos;
 
-    /**
+    /** 关联底层的nioChannel
      * Underlying socket.
      */
     private NioChannel socket;
 
-    /**
+    /** 提供selector的pool.它用于读取http请求的body数据.因为必须要阻塞的读取,所以使用selector协作
      * Selector pool, for blocking reads and blocking writes
      */
     private NioSelectorPool pool;
 
 
-    /**
+    /** 允许的最大header大小
      * Maximum allowed size of the HTTP request line plus headers plus any
      * leading blank lines.
      */
     private final int headerBufferSize;
 
-    /**
+    /** channel设置的读取的buffer的size
      * Known size of the NioChannel read buffer.
      */
     private int socketReadBufferSize;
@@ -221,23 +221,23 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
             byte chr = 0;
             do {
 
-                // Read new bytes if needed
+                // Read new bytes if needed. 若需要,则读取新的字节
                 if (pos >= lastValid) {
                     if (useAvailableDataOnly) {
                         return false;
                     }
-                    // Do a simple read with a short timeout
+                    // Do a simple read with a short timeout.做一个短超时的简单读取操作.fill(是否有超时, 是否阻塞)
                     if (!fill(true, false)) {
                         return false;
                     }
                 }
                 // Set the start time once we start reading data (even if it is
-                // just skipping blank lines)
+                // just skipping blank lines) 设置 读取请求 的开始时间
                 if (request.getStartTime() < 0) {
                     request.setStartTime(System.currentTimeMillis());
                 }
-                chr = buf[pos++];
-            } while ((chr == Constants.CR) || (chr == Constants.LF));
+                chr = buf[pos++];// 读取当前字节(pos位置的字节)到buf缓冲区中,并将缓冲区中的位置++. chr是byte类型
+            } while ((chr == Constants.CR) || (chr == Constants.LF));// 若遇到 字符是CR 或LF继续读取,即\r和\n代表请求行解析完毕
             pos--;
 
             parsingRequestLineStart = pos;
@@ -250,7 +250,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
         }
         if ( parsingRequestLinePhase == 2 ) {
             //
-            // Reading the method name
+            // Reading the method name 下面读取请求行中的  方法名
             // Method name is a token
             //
             boolean space = false;
@@ -262,9 +262,9 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
                 }
                 // Spec says method name is a token followed by a single SP but
                 // also be tolerant of multiple SP and/or HT.
-                if (buf[pos] == Constants.SP || buf[pos] == Constants.HT) {
+                if (buf[pos] == Constants.SP || buf[pos] == Constants.HT) {// 空格 或 \t
                     space = true;
-                    request.method().setBytes(buf, parsingRequestLineStart, pos - parsingRequestLineStart);
+                    request.method().setBytes(buf, parsingRequestLineStart, pos - parsingRequestLineStart);// 设置请求方法,如GET
                 } else if (!HttpParser.isToken(buf[pos])) {
                     throw new IllegalArgumentException(sm.getString("iib.invalidmethod"));
                 }
@@ -272,7 +272,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
             }
             parsingRequestLinePhase = 3;
         }
-        if ( parsingRequestLinePhase == 3 ) {
+        if ( parsingRequestLinePhase == 3 ) {// 跳过多个空格
             // Spec says single SP but also be tolerant of multiple SP and/or HT
             boolean space = true;
             while (space) {
@@ -295,7 +295,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
 
             int end = 0;
             //
-            // Reading the URI
+            // Reading the URI 下面读取请求行中的URI
             //
             boolean space = false;
             while (!space) {
@@ -320,8 +320,8 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
                 }
                 pos++;
             }
-            request.unparsedURI().setBytes(buf, parsingRequestLineStart, end - parsingRequestLineStart);
-            if (parsingRequestLineQPos >= 0) {
+            request.unparsedURI().setBytes(buf, parsingRequestLineStart, end - parsingRequestLineStart);// 设置URI
+            if (parsingRequestLineQPos >= 0) {// 设置 查询参数
                 request.queryString().setBytes(buf, parsingRequestLineQPos + 1,
                                                end - parsingRequestLineQPos - 1);
                 request.requestURI().setBytes(buf, parsingRequestLineStart, parsingRequestLineQPos - parsingRequestLineStart);
@@ -333,7 +333,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
         if ( parsingRequestLinePhase == 5 ) {
             // Spec says single SP but also be tolerant of multiple and/or HT
             boolean space = true;
-            while (space) {
+            while (space) {// 跳过多个空格
                 // Read new bytes if needed
                 if (pos >= lastValid) {
                     if (!fill(true, false)) //request line parsing
@@ -353,7 +353,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
         }
         if (parsingRequestLinePhase == 6) {
             //
-            // Reading the protocol
+            // Reading the protocol 下面解析请求行中的 请求协议,如HTTP/1.1
             // Protocol is always "HTTP/" DIGIT "." DIGIT
             //
             while (!parsingRequestLineEol) {
@@ -376,7 +376,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
             }
 
             if ( (end - parsingRequestLineStart) > 0) {
-                request.protocol().setBytes(buf, parsingRequestLineStart, end - parsingRequestLineStart);
+                request.protocol().setBytes(buf, parsingRequestLineStart, end - parsingRequestLineStart);// 设置请求协议
             } else {
                 request.protocol().setString("");
             }
@@ -404,7 +404,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
         }
     }
 
-    /**
+    /** 从底层socket读取数据.有阻塞式 和 非阻塞式 从 socket中读.若采用nio,在处理http请求的requestLine和header时非阻塞. 处理body时必须阻塞(因为读取body部分的 代码一般是在servlet部分控制的即上层代码控制,已经超出tomcat控制范围).从底层channel读取数据,将数据从channel拷贝到当前对象的buf中
      * Perform blocking read with a timeout if desired
      * @param timeout boolean - if we want to use the timeout data
      * @param block - true if the system should perform a blocking read, false otherwise
@@ -415,11 +415,11 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
 
     private int readSocket(boolean timeout, boolean block) throws IOException {
         int nRead = 0;
-        socket.getBufHandler().getReadBuffer().clear();
-        if ( block ) {
+        socket.getBufHandler().getReadBuffer().clear();// 清空nio.ByteBuffer,方便下面将socket里读取的新数据写进去
+        if ( block ) {// 若是阻塞的话(读取body时阻塞),将会获取selector关联的socket,节约cpu
             Selector selector = null;
             try {
-                selector = pool.get();
+                selector = pool.get();// 从selector池中获取一个selector
             } catch ( IOException x ) {
                 // Ignore
             }
@@ -436,17 +436,17 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
             } finally {
                 if ( selector != null ) pool.put(selector);
             }
-        } else {
+        } else {// 非阻塞读数据,有多少则读取多少数据
             nRead = socket.read(socket.getBufHandler().getReadBuffer());
         }
-        if (nRead > 0) {
-            socket.getBufHandler().getReadBuffer().flip();
-            socket.getBufHandler().getReadBuffer().limit(nRead);
-            expand(nRead + pos);
-            socket.getBufHandler().getReadBuffer().get(buf, pos, nRead);
-            lastValid = pos + nRead;
+        if (nRead > 0) {// 若有数据读取出来
+            socket.getBufHandler().getReadBuffer().flip();// 调用ByteBuffer.flip()将buffer切换到读模式
+            socket.getBufHandler().getReadBuffer().limit(nRead);// 设置buffer.limit
+            expand(nRead + pos);// 检查当前对象的buf字节数组容量是否够大,若不够则扩容
+            socket.getBufHandler().getReadBuffer().get(buf, pos, nRead);// 将socket读取的数据 转移到当前对象的buf数组中
+            lastValid = pos + nRead;// 更新最后一个有效数据的下标
             return nRead;
-        } else if (nRead == -1) {
+        } else if (nRead == -1) {// 若-1,表示出错了
             //return false;
             throw new EOFException(sm.getString("iib.eof.error"));
         } else {
@@ -465,7 +465,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
                     sm.getString("iib.parseheaders.ise.error"));
         }
 
-        HeaderParseStatus status = HeaderParseStatus.HAVE_MORE_HEADERS;
+        HeaderParseStatus status = HeaderParseStatus.HAVE_MORE_HEADERS;// 请求头解析状态 设置为 "还有更多请求头" 要解析
 
         do {
             status = parseHeader();
@@ -553,7 +553,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
             }
 
             chr = buf[pos];
-            if (chr == Constants.COLON) {
+            if (chr == Constants.COLON) {// 冒号
                 headerParsePos = HeaderParsePosition.HEADER_VALUE_START;
                 headerData.headerValue = headers.addValue(buf, headerData.start, pos - headerData.start);
                 pos++;
@@ -571,7 +571,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
             }
 
             // chr is next byte of header name. Convert to lowercase.
-            if ((chr >= Constants.A) && (chr <= Constants.Z)) {
+            if ((chr >= Constants.A) && (chr <= Constants.Z)) {// 大写转小写
                 buf[pos] = (byte) (chr - Constants.LC_OFFSET);
             }
             pos++;
@@ -763,16 +763,16 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
     protected void init(SocketWrapper<NioChannel> socketWrapper,
             AbstractEndpoint<NioChannel> endpoint) throws IOException {
 
-        socket = socketWrapper.getSocket();
+        socket = socketWrapper.getSocket();// 获取NioChannel
         socketReadBufferSize =
-            socket.getBufHandler().getReadBuffer().capacity();
+            socket.getBufHandler().getReadBuffer().capacity();// 获取nio.buffer的容量
 
         int bufLength = headerBufferSize + socketReadBufferSize;
         if (buf == null || buf.length < bufLength) {
-            buf = new byte[bufLength];
+            buf = new byte[bufLength];// 初始化buf数组的大小
         }
 
-        pool = ((NioEndpoint)endpoint).getSelectorPool();
+        pool = ((NioEndpoint)endpoint).getSelectorPool();// 设置selector池
     }
 
 
@@ -785,22 +785,22 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
     protected boolean fill(boolean block) throws IOException, EOFException {
         return fill(true,block);
     }
-
+    /**读取socket数据到buf字节数组.timeout:是否有超时; block:是否阻塞读*/
     protected boolean fill(boolean timeout, boolean block) throws IOException, EOFException {
 
 
         boolean read = false;
 
-        if (parsingHeader) {
+        if (parsingHeader) {// 正在解析header
 
             if (lastValid > headerBufferSize) {
                 throw new IllegalArgumentException
                     (sm.getString("iib.requestheadertoolarge.error"));
             }
 
-            // Do a simple read with a short timeout
-            read = readSocket(timeout,block)>0;
-        } else {
+            // Do a simple read with a short timeout.短时间简单读取socket数据
+            read = readSocket(timeout,block)>0;// 具体调用readSocket()处理
+        } else {// body的数据
             lastValid = pos = end;
             // Do a simple read with a short timeout
             read = readSocket(timeout, block)>0;
@@ -812,7 +812,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
     // ------------------------------------- InputStreamInputBuffer Inner Class
 
 
-    /**
+    /** 代理当前对象的读取数据的方法,将方法暴露给外部对象
      * This class is an input buffer which will read its data from an input
      * stream.
      */
@@ -820,21 +820,21 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
         implements InputBuffer {
 
 
-        /**
+        /** 若需要则从socket读数据到buf数组. 将当前对象的字节数组buf 设置到chunk中
          * Read bytes into the specified chunk.
          */
         @Override
         public int doRead(ByteChunk chunk, Request req )
             throws IOException {
 
-            if (pos >= lastValid) {
-                if (!fill(true,true)) //read body, must be blocking, as the thread is inside the app
+            if (pos >= lastValid) {// 若字节数组没有数据可以读取了,调用fill从socket里读取数据,并保存到当前对象的字节数组
+                if (!fill(true,true)) //此处阻塞读.read body, must be blocking, as the thread is inside the app
                     return -1;
             }
 
-            int length = lastValid - pos;
-            chunk.setBytes(buf, pos, length);
-            pos = lastValid;
+            int length = lastValid - pos;// bufr中还有多少数据可以读取
+            chunk.setBytes(buf, pos, length);// 将当前对象的字节数组buf 设置到chunk中 
+            pos = lastValid;// 更新pos下标
 
             return (length);
         }

@@ -767,7 +767,7 @@ public final class Mapper {
     // -------------------------------------------------------- Private Methods
 
 
-    /**
+    /** 负责完成具体的请求路径的匹配
      * Map the specified URI.
      */
     private final void internalMap(CharChunk host, CharChunk uri,
@@ -785,19 +785,19 @@ public final class Mapper {
 
         // Virtual host mapping
         Host[] hosts = this.hosts;
-        Host mappedHost = exactFindIgnoreCase(hosts, host);
+        Host mappedHost = exactFindIgnoreCase(hosts, host);// 查找匹配的host
         if (mappedHost == null) {
             if (defaultHostName == null) {
                 return;
             }
-            mappedHost = exactFind(hosts, defaultHostName);
+            mappedHost = exactFind(hosts, defaultHostName);// 如果查找不到 使用defaultHostName再次进行查询
             if (mappedHost == null) {
                 return;
             }
         }
-        mappingData.host = mappedHost.object;
+        mappingData.host = mappedHost.object;// 设置匹配到的host
 
-        // Context mapping
+        // Context mapping. 查找匹配的context
         ContextList contextList = mappedHost.contextList;
         Context[] contexts = contextList.contexts;
         int nesting = contextList.nesting;
@@ -814,7 +814,7 @@ public final class Mapper {
         Context context = null;
         while (pos >= 0) {
             context = contexts[pos];
-            if (uri.startsWith(context.name)) {
+            if (uri.startsWith(context.name)) {// 比对context
                 length = context.name.length();
                 if (uri.getLength() == length) {
                     found = true;
@@ -865,12 +865,12 @@ public final class Mapper {
             // The versions array is known to contain at least one element
             contextVersion = contextVersions[versionCount - 1];
         }
-
+        // 设置匹配的context
         mappingData.context = contextVersion.object;
         mappingData.contextSlashCount = contextVersion.slashCount;
 
         // Wrapper mapping
-        if (!contextVersion.isPaused()) {
+        if (!contextVersion.isPaused()) {// 设置匹配的wrapper
             internalMapWrapper(contextVersion, uri, mappingData);
         }
 

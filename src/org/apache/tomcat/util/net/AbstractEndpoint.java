@@ -540,12 +540,12 @@ public abstract class AbstractEndpoint<S> {
         return paused;
     }
 
-
+    /**创建Executor线程池.即ThreadPoolExecutor*/
     public void createExecutor() {
         internalExecutor = true;
         TaskQueue taskqueue = new TaskQueue();
         TaskThreadFactory tf = new TaskThreadFactory(getName() + "-exec-", daemon, getThreadPriority());
-        executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);// (corePoolSize, maxPoolSize, keepAliveTime, timeUnit, workQueue)
+        executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);// 若server.xml没有配置,默认getMinSpareThreads()返回10,getMaxThreads()返回200.即tomcat内部线程池默认最小线程数量10,最大200.(corePoolSize, maxPoolSize, keepAliveTime, timeUnit, workQueue)
         taskqueue.setParent( (ThreadPoolExecutor) executor);
     }
 
@@ -753,7 +753,7 @@ public abstract class AbstractEndpoint<S> {
         acceptors = new Acceptor[count];
 
         for (int i = 0; i < count; i++) {
-            acceptors[i] = createAcceptor();// 创建acceptor线程
+            acceptors[i] = createAcceptor();// 创建并启动acceptor线程
             String threadName = getName() + "-Acceptor-" + i;
             acceptors[i].setThreadName(threadName);
             Thread t = new Thread(acceptors[i], threadName);

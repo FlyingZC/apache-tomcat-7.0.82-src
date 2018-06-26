@@ -47,7 +47,7 @@ import org.apache.tomcat.util.modeler.Util;
 import org.apache.tomcat.util.res.StringManager;
 
 
-/**
+/** 实现FilterConfig接口，用于管理web应用第一次启动时创建的所有过滤器实例，简单理解就是用来管理filter类的统一管理类。
  * Implementation of a <code>javax.servlet.FilterConfig</code> useful in
  * managing the filter instances instantiated when a web application
  * is first started.

@@ -312,7 +312,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                     }
 
                     if ((state != SocketState.CLOSED)) {// 处理套接字
-                        if (status == null) {// 调用handler进行处理
+                        if (status == null) {// 调用handler对socket进行处理
                             state = handler.process(socket, SocketStatus.OPEN_READ);
                         } else {
                             state = handler.process(socket,status);
@@ -523,14 +523,14 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
     protected boolean processSocket(Socket socket) {
         // Process the request from this socket
         try {
-            SocketWrapper<Socket> wrapper = new SocketWrapper<Socket>(socket);
+            SocketWrapper<Socket> wrapper = new SocketWrapper<Socket>(socket);// 将socket包装成SocketWrapper类
             wrapper.setKeepAliveLeft(getMaxKeepAliveRequests());
             wrapper.setSecure(isSSLEnabled());
             // During shutdown, executor may be null - avoid NPE
             if (!running) {
                 return false;
             }
-            getExecutor().execute(new SocketProcessor(wrapper));
+            getExecutor().execute(new SocketProcessor(wrapper));// 获取线程执行SocketProcessor任务.则后续线程会执行SocketProcessor.run()
         } catch (RejectedExecutionException x) {
             log.warn("Socket processing request was rejected for:"+socket,x);
             return false;
