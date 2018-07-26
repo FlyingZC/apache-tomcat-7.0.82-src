@@ -49,7 +49,7 @@ public class JasperListener
     // ---------------------------------------------- LifecycleListener Methods
 
 
-    /**
+    /** 初始化前对JspRuntimeContext类进行装载
      * Primary entry point for startup and shutdown events.
      *
      * @param event The event that has occurred

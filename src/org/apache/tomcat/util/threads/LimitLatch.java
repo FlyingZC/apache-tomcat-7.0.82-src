@@ -23,7 +23,7 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-/**连接器控制器.BIO模式下Limit的限制数与线程池的最大线程数密切相关,比例1:1
+/**连接器控制器.BIO模式下Limit的限制数与线程池的最大线程数密切相关,比例1:1.NIO模式下也使用该类控制连接数.使用AQS实现
  * Shared latch that allows the latch to be acquired a limited number of times
  * after which all subsequent requests to acquire the latch will be placed in a
  * FIFO queue until one of the shares is returned.
@@ -41,28 +41,28 @@ public class LimitLatch {
         @Override
         protected int tryAcquireShared(int ignored) {
             long newCount = count.incrementAndGet();// 连接数计数 增加 并 获取
-            if (!released && newCount > limit) {// 连接数大于limit
-                // Limit exceeded
-                count.decrementAndGet();// 减小 并 获取
-                return -1;
+            if (!released && newCount > limit) {// (连接没有全部释放)且 连接数大于limit
+                // Limit exceeded.连接数超出限制
+                count.decrementAndGet();// 连接数 减小 并 获取
+                return -1;// 同步状态获取失败
             } else {
-                return 1;
+                return 1;// 同步状态获取成功
             }
         }
         // 共享式 释放同步状态
         @Override
         protected boolean tryReleaseShared(int arg) {
-            count.decrementAndGet();// 减小并获取
-            return true;
+            count.decrementAndGet();// 连接数 减小并获取
+            return true;// 同步状态释放成功
         }
     }
 
     private final Sync sync;
     private final AtomicLong count;// 连接 计数
-    private volatile long limit;
+    private volatile long limit;// 连接数阀值
     private volatile boolean released = false;// 连接全部释放标志
 
-    /**
+    /** 使用limit初始化LimitLatch
      * Instantiates a LimitLatch object with an initial limit.
      * @param limit - maximum number of concurrent acquisitions of this latch
      */
@@ -80,7 +80,7 @@ public class LimitLatch {
         return count.get();
     }
 
-    /**获取当前limit
+    /** 获取当前limit(阀值)
      * Obtain the current limit.
      */
     public long getLimit() {
@@ -112,7 +112,7 @@ public class LimitLatch {
         if (log.isDebugEnabled()) {
             log.debug("Counting up["+Thread.currentThread().getName()+"] latch="+getCount());
         }
-        sync.acquireSharedInterruptibly(1);// 独占式获取同步状态.若当前线程未获取到同步状态而进入到同步队列中(这个过程中若当前线程被终端,则该方法抛出InterruptedException并返回)
+        sync.acquireSharedInterruptibly(1);// 共享式获取同步状态.若当前线程未获取到同步状态而进入到同步队列中(这个过程中若当前线程被中断,则该方法抛出InterruptedException并返回).最终会调用sync.tryAcquireShared()增加count计数
     }
 
     /** 计数器 减操作 和 唤醒线程
@@ -121,7 +121,7 @@ public class LimitLatch {
      */
     public long countDown() {
         sync.releaseShared(0);// 共享式的释放同步状态
-        long result = getCount();
+        long result = getCount();// 获取count计数
         if (log.isDebugEnabled()) {
             log.debug("Counting down["+Thread.currentThread().getName()+"] latch="+result);
     }

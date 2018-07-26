@@ -22,7 +22,7 @@ package org.apache.catalina;
 import java.util.EventObject;
 
 
-/**
+/** 事件对象,封装事件信息,继承自java.util.EventObject
  * General event for notifying listeners of significant changes on a component
  * that implements the Lifecycle interface.  In particular, this will be useful
  * on Containers, where these events replace the ContextInterceptor concept in

@@ -17,7 +17,7 @@
 
 package org.apache.catalina;
 
-/**
+/** 生命周期状态
  * The list of valid states for components that implement {@link Lifecycle}.
  * See {@link Lifecycle} for the state transition diagram.
  */

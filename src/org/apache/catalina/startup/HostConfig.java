@@ -349,8 +349,8 @@ public class HostConfig
 
         // Identify the host we are associated with
         try {
-            host = (Host) event.getLifecycle();
-            if (host instanceof StandardHost) {
+            host = (Host) event.getLifecycle();// 当前所监听的lifecycle对象，这里监听的是host对象
+            if (host instanceof StandardHost) {// 根据host的信息，来设置一些配置
                 setCopyXML(((StandardHost) host).isCopyXML());
                 setDeployXML(((StandardHost) host).isDeployXML());
                 setUnpackWARs(((StandardHost) host).isUnpackWARs());
@@ -361,7 +361,7 @@ public class HostConfig
             return;
         }
 
-        // Process the event that has occurred
+        // Process the event that has occurred. 处理生命周期事件
         if (event.getType().equals(Lifecycle.PERIODIC_EVENT)) {
             check();// 后台处理完成后事件.通过DeployedApplication维护了两个守护资源列表.redeployResources(守护导致应用重新部署的资源)和reloadResources(守护导致应用重新加载的资源).检测资源变更,重新加载或部署并更新最后修改时间
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {

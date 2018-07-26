@@ -164,7 +164,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
 
 
     /**
-     * Cache for key attachment objects. //attachment对象的缓存队列
+     * Cache for key attachment objects. //keyAttachment对象的缓存队列
      */
     protected ConcurrentLinkedQueue<KeyAttachment> keyCache = new ConcurrentLinkedQueue<KeyAttachment>() {
         private static final long serialVersionUID = 1L;
@@ -659,11 +659,11 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
         // Process the connection
         try {
             //disable blocking, APR style, we are gonna be polling it
-            socket.configureBlocking(false);// 将socket连接通道设置为非阻塞模式
-            Socket sock = socket.socket();
+            socket.configureBlocking(false);// 将socket连接通道(socketChannel)设置为非阻塞模式
+            Socket sock = socket.socket();// 从nio.SocketChannel中获取java.net.Socket
             socketProperties.setProperties(sock);// 设置socket的参数值(从server.xml的Connector节点上获取参数值),如 socket发送,接收的大小.心跳检测等
 
-            NioChannel channel = nioChannels.poll();// 构造NioChannel对象,从ConcurrentLinkedQueue(NioChannel的缓存队列)队列中取
+            NioChannel channel = nioChannels.poll();// 构造NioChannel对象,从ConcurrentLinkedQueue(NioChannel的线程安全的缓存队列)队列中取
             if ( channel == null ) {// 若从缓存队列Queue中取不到nioChannel,则新创建
                 // SSL setup
                 if (sslContext != null) {
@@ -798,12 +798,12 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
 
             int errorDelay = 0;
 
-            // Loop until we receive a shutdown command
+            // Loop until we receive a shutdown command.循环遍历 直到接收到关闭命令
             while (running) {
 
-                // Loop if endpoint is paused. 循环遍历 直到接收到关闭命令
+                // Loop if endpoint is paused. 如果endpoint被暂停 且 running 则一直循环
                 while (paused && running) {
-                    state = AcceptorState.PAUSED;
+                    state = AcceptorState.PAUSED;// acceptor状态设置为paused
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e) {
@@ -811,13 +811,13 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     }
                 }
 
-                if (!running) {
+                if (!running) {// 不是running 则跳出循环
                     break;
                 }
-                state = AcceptorState.RUNNING;
+                state = AcceptorState.RUNNING;// acceptor状态 设置为running
 
                 try {
-                    //if we have reached max connections, wait. 若已经到达 最大连接数 则让线程等待
+                    //if we have reached max connections, wait. 若已经到达 最大连接数 则让线程等待(直到其他线程释放连接)
                     countUpOrAwaitConnection();
 
                     SocketChannel socket = null;
@@ -836,7 +836,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     // Successful accept, reset the error delay
                     errorDelay = 0;
 
-                    // setSocketOptions() will add channel to the poller.设置socket属性,将会 把channel添加到poller中
+                    // setSocketOptions() will add channel to the poller.设置socket属性,setSocketOptions()将会 把channel添加到poller中
                     // if successful
                     if (running && !paused) {
                         if (!setSocketOptions(socket)) {// 设置socket属性,这里面主要 将socketChannel包装到nioChannel里.再将nioChannel包装到PollerEvent里,并放入轮询的事件队列events中
@@ -879,7 +879,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
         }
     }
 
-
+    /**关闭socket连接*/
     private void closeSocket(SocketChannel socket) {
         try {
             socket.socket().close();
@@ -925,13 +925,13 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
 
         @Override
         public void run() {
-            if ( interestOps == OP_REGISTER ) {// socket第一次注册到selector中,完成对socket读事件的注册OP_READ
+            if ( interestOps == OP_REGISTER ) {// (PollerEvent的interestOps为OP_REGISTER)当socket第一次注册到selector中时,完成对socket读事件的注册OP_READ(将nio中的channel注册到selector上,这样才能后续从selector中获取key)
                 try {
-                    socket.getIOChannel().register(socket.getPoller().getSelector(), SelectionKey.OP_READ, key);// 注册 读事件.即socketChannel.register(selector, opts, attr).att-所得键的附件信息KeyAttachment，可能为 null 
+                    socket.getIOChannel().register(socket.getPoller().getSelector(), SelectionKey.OP_READ, key);// 注册 读事件.(socket为NioChannel对象),即socketChannel.register(selector, opts, attr).att-所得键的附件信息KeyAttachment，可能为 null 
                 } catch (Exception x) {
                     log.error("", x);
                 }
-            } else {// 其实就是socketChannel.keyFor(selector); keyFor获取通道(channel)向给定选择器(selector)注册的键.socket之前已经注册到了selector中,更新socket感兴趣的事件
+            } else {// 选择键:其实就是socketChannel.keyFor(selector); keyFor获取通道(channel)向给定选择器(selector)注册的键.socket之前已经注册到了selector中,更新socket感兴趣的事件
                 final SelectionKey key = socket.getIOChannel().keyFor(socket.getPoller().getSelector());
                 try {
                     if (key == null) {
@@ -984,9 +984,9 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
         
         protected volatile boolean close = false;
         protected long nextExpiration = 0;//optimize expiration handling. 优化过期处理
-        /**唤醒多路复用器(即nio中的selector)的条件阈值*/   
+        /**唤醒多路复用器(即nio中的selector)的条件阈值.作用:1.告诉Poller当前有多少个新连接，这样当Poller进行selector的操作时，可以选择是否需要阻塞来等待读写请求到达;2.标识Poller在进行select选择时，是否有连接到达。如果有，就让当前的阻塞调用立即返回*/   
         protected AtomicLong wakeupCounter = new AtomicLong(0l);
-
+        /**注册到Poller的channel中，I/O状态已经OK的的个数*/
         protected volatile int keyCount = 0;
 
         public Poller() throws IOException {
@@ -1098,7 +1098,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
             ka.setSecure(isSSLEnabled());
             PollerEvent r = eventCache.poll();// 从通道缓存队列中取出一个PollerEvent
             ka.interestOps(SelectionKey.OP_READ);//this is what OP_REGISTER turns into.设置keyAttachement 读操作(SelectionKey.OP_READ) 为感兴趣的操作
-            if ( r==null) r = new PollerEvent(socket,ka,OP_REGISTER);// 若取出为空,新建.将nioChannel包装到PollerEvent对象中, 并注册一个OP_REGISTER(表示这是新的channel需要注册 )(对应)928行pollerEvent.run()里
+            if ( r==null) r = new PollerEvent(socket,ka,OP_REGISTER);// 若取出为空,新建.将nioChannel包装到PollerEvent对象中, 并注册一个OP_REGISTER(表示这是新的channel需要注册 )(对应)928行pollerEvent.run()里(该行会把接收到的新channel注册到selector中)
             else r.reset(socket,ka,OP_REGISTER);// 否则,重置PollerEvent属性
             addEvent(r);// 将PollerEvent添加到轮询队列(events)中
         }
@@ -1181,7 +1181,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     // Loop if endpoint is paused
                     while (paused && (!close) ) {
                         try {
-                            Thread.sleep(100);
+                            Thread.sleep(100);// 0.1s轮询一次
                         } catch (InterruptedException e) {
                             // Ignore
                         }
@@ -1206,8 +1206,8 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     try {
                         if ( !close ) {
                             if (wakeupCounter.getAndSet(-1) > 0) {// 把wakeupCounter设置成-1并返回旧值,与addEvent()里的代码相呼应,这样会唤醒selector
-                                //if we are here, means we have other stuff to do
-                                //do a non blocking select
+                                //if we are here, means we have other stuff to do.到这一步,说明有请求需要处理了
+                                //do a non blocking select.开启非阻塞select
                                 keyCount = selector.selectNow();// 以非阻塞方式查看selector是否有事件发生 
                             } else {
                                 keyCount = selector.select(selectorTimeout);// 查看selector是否有事件发生,超出指定时间则立刻返回
@@ -1301,12 +1301,12 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                                 boolean closeSocket = false;
                                 // Read goes before write
                                 if (sk.isReadable()) {
-                                    if (!processSocket(channel, SocketStatus.OPEN_READ, true)) {
+                                    if (!processSocket(channel, SocketStatus.OPEN_READ, true)) {// 通道 读数据
                                         closeSocket = true;
                                     }
                                 }
                                 if (!closeSocket && sk.isWritable()) {
-                                    if (!processSocket(channel, SocketStatus.OPEN_WRITE, true)) {// 具体的 通道处理逻辑
+                                    if (!processSocket(channel, SocketStatus.OPEN_WRITE, true)) {// 具体的 通道写操作 处理逻辑
                                         closeSocket = true;
                                     }
                                 }
@@ -1655,7 +1655,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
     public static class NioBufferHandler implements ApplicationBufferHandler {
         protected ByteBuffer readbuf = null;
         protected ByteBuffer writebuf = null;
-
+        /**构造方法,为buffer分配空间*/
         public NioBufferHandler(int readsize, int writesize, boolean direct) {
             if ( direct ) {
                 readbuf = ByteBuffer.allocateDirect(readsize);

@@ -80,7 +80,7 @@ public abstract class LifecycleBase implements Lifecycle {
     }
 
 
-    /**
+    /** 触发生命周期事件LifecycleEvent
      * Allow sub classes to fire {@link Lifecycle} events.
      *
      * @param type  Event type
@@ -93,14 +93,14 @@ public abstract class LifecycleBase implements Lifecycle {
 
     @Override
     public final synchronized void init() throws LifecycleException {
-        if (!state.equals(LifecycleState.NEW)) {
+        if (!state.equals(LifecycleState.NEW)) {// /查看组件状态是否为LifecycleState.NEW, 在调用init()之前的状态应该是NEW
             invalidTransition(Lifecycle.BEFORE_INIT_EVENT);
         }
         // 从StandardServer到StandardWrapper，都会调用initInternal()，并伴随调用共有父类LifecycleBase.init()
-        try {// 变更生命周期状态(通过事件变更)
+        try {// 变更生命周期状态为LifecycleState.INITIALIZING(通过事件变更)
             setStateInternal(LifecycleState.INITIALIZING, null, false);// 调用各个事件监听中的 initializing
             initInternal();// 进入子类的initInternal()方法
-            setStateInternal(LifecycleState.INITIALIZED, null, false);
+            setStateInternal(LifecycleState.INITIALIZED, null, false);// 更新组件生命周期状态为LifecycleState.INITIALIZED
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             setStateInternal(LifecycleState.FAILED, null, false);
@@ -347,7 +347,7 @@ public abstract class LifecycleBase implements Lifecycle {
             throws LifecycleException {
         setStateInternal(state, data, true);
     }
-
+    /**更新组件状态*/
     private synchronized void setStateInternal(LifecycleState state,
             Object data, boolean check) throws LifecycleException {
 
@@ -383,7 +383,7 @@ public abstract class LifecycleBase implements Lifecycle {
         }
 
         this.state = state;
-        String lifecycleEvent = state.getLifecycleEvent();
+        String lifecycleEvent = state.getLifecycleEvent();// 获取LifecycleState(生命周期状态)对应的生命周期方法.如INITIALIZING状态对应before_init()方法
         if (lifecycleEvent != null) {
             fireLifecycleEvent(lifecycleEvent, data);
         }

@@ -66,7 +66,7 @@ public final class Bootstrap {
      */
     private Object catalinaDaemon = null;
 
-
+    // 类加载器
     ClassLoader commonLoader = null;
     ClassLoader catalinaLoader = null;
     ClassLoader sharedLoader = null;
@@ -74,16 +74,16 @@ public final class Bootstrap {
 
     // -------------------------------------------------------- Private Methods
 
-
+    /**初始化类加载器*/
     private void initClassLoaders() {
         try {
-            commonLoader = createClassLoader("common", null);
+            commonLoader = createClassLoader("common", null);// 创建一个Common类加载器
             if( commonLoader == null ) {
                 // no config file, default to this loader - we might be in a 'single' env.
                 commonLoader=this.getClass().getClassLoader();
-            }
-            catalinaLoader = createClassLoader("server", commonLoader);
-            sharedLoader = createClassLoader("shared", commonLoader);
+            }// 默认catalinaLoader和sharedLoader都使用父类加载器commonLoader
+            catalinaLoader = createClassLoader("server", commonLoader);// 再根据Common类加载器创建server类加载器
+            sharedLoader = createClassLoader("shared", commonLoader);// 再根据Common类加载器创建shared类加载器
         } catch (Throwable t) {
             handleThrowable(t);
             log.error("Class loader creation threw exception", t);
@@ -91,12 +91,12 @@ public final class Bootstrap {
         }
     }
 
-    /**若配置了路径,则创建classLoader,否则返回父classLoader */
+    /**若配置了路径,则创建classLoader,否则返回父classLoader.可用于创建commonClassLoader,serverClassLoader,sharedClassLoader @param name 类加载器名*/
     private ClassLoader createClassLoader(String name, ClassLoader parent)
         throws Exception {
-
-        String value = CatalinaProperties.getProperty(name + ".loader");
-        if ((value == null) || (value.equals("")))
+        // 创建一个类加载器的步骤:1.把要加载的资源都添加到一个列表中;2.确定父类加载器,若使用默认的则传null;3.把这些参数传入ClassLoaderFactory工厂类去创建URLClassLoader实例
+        String value = CatalinaProperties.getProperty(name + ".loader");// value是需要加载的资源列表
+        if ((value == null) || (value.equals("")))// 如果没有配置server.loader或shared.loader等,则返回父类加载器,即此处为commonLoader
             return parent;
 
         value = replace(value);
@@ -105,15 +105,15 @@ public final class Bootstrap {
         // D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2/lib,D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2/lib/*.jar,E:\Java\apache-tomcat-7.0.82-01/lib,E:\Java\apache-tomcat-7.0.82-01/lib/*.jar
         StringTokenizer tokenizer = new StringTokenizer(value, ",");
         while (tokenizer.hasMoreElements()) {
-            String repository = tokenizer.nextToken().trim();
+            String repository = tokenizer.nextToken().trim();// 截取成一个个的资源列表
             if (repository.length() == 0) {
                 continue;
             }
 
-            // Check for a JAR URL repository
+            // Check for a JAR URL repository 先判断是不是网络资源
             try {
                 @SuppressWarnings("unused")
-                URL url = new URL(repository);
+                URL url = new URL(repository);// 若不确定要加载的资源是在网络上 还是在本地,使用URL加载.若是网络资源则不抛异常走到119行continue进行下一个操作.若是本地资源抛异常,接着走下面的代码
                 repositories.add(
                         new Repository(repository, RepositoryType.URL));
                 continue;
@@ -121,17 +121,17 @@ public final class Bootstrap {
                 // Ignore
             }
 
-            // Local repository
-            if (repository.endsWith("*.jar")) {// 全局jar
+            // Local repository 本地资源
+            if (repository.endsWith("*.jar")) {// 表示整个目录下所有的Jar包资源,仅仅是.jar后缀的资源(*.jar即所有jar)
                 repository = repository.substring
                     (0, repository.length() - "*.jar".length());
                 repositories.add(
                         new Repository(repository, RepositoryType.GLOB));
-            } else if (repository.endsWith(".jar")) {// jar
+            } else if (repository.endsWith(".jar")) {// 单个jar
                 repositories.add(
                         new Repository(repository, RepositoryType.JAR));
             } else {
-                repositories.add(// dir
+                repositories.add(// dir.表示整个目录下的资源,包括所有Class,Jar包以及其他类型资源
                         new Repository(repository, RepositoryType.DIR));
             }
         }

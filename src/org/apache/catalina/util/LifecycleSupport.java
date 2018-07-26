@@ -24,7 +24,7 @@ import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
 
 
-/**
+/** 辅助类:用于帮助管理该组件或容器上的监听器,里面维护了一个监听器数组,并提供了注册,移除,触发监听器等方法
  * Support class to assist in firing LifecycleEvent notifications to
  * registered LifecycleListeners.
  *
@@ -110,7 +110,7 @@ public final class LifecycleSupport {
      * @param data Event data
      */
     public void fireLifecycleEvent(String type, Object data) {
-
+        // 本类对象在LifecycleBase的成员变量声明private LifecycleSupport lifecycle = new LifecycleSupport(this); 所以此处lifecycle就是this指代的如StandServer等容器
         LifecycleEvent event = new LifecycleEvent(lifecycle, type, data);
         LifecycleListener interested[] = listeners;
         for (int i = 0; i < interested.length; i++)

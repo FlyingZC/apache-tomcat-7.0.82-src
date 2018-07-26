@@ -46,7 +46,7 @@ public class NioChannel implements ByteChannel{
     protected static ByteBuffer emptyBuf = ByteBuffer.allocate(0);
     /**进行读写操作的nio.SocketChannel*/ 
     protected SocketChannel sc = null;
-    /**提供用于操作 待写入SocketChannel缓存区 和 读取SocketChannel的缓冲区的协助方法.对nio.Buffer的封装*/ 
+    /**提供用于操作 待写入SocketChannel缓存区 和 读取SocketChannel的缓冲区的协助方法.对nio.Buffer的封装.具体实现类是NioEndpoint.NioBufferHandler*/ 
     protected ApplicationBufferHandler bufHandler;
 
     protected Poller poller;
@@ -139,10 +139,10 @@ public class NioChannel implements ByteChannel{
     }
 
     public Object getAttachment() {
-        Poller pol = getPoller();
-        Selector sel = pol!=null?pol.getSelector():null;
-        SelectionKey key = sel!=null?getIOChannel().keyFor(sel):null;
-        Object att = key!=null?key.attachment():null;
+        Poller pol = getPoller();// 获取poller
+        Selector sel = pol!=null?pol.getSelector():null;// 获取poller.Selector
+        SelectionKey key = sel!=null?getIOChannel().keyFor(sel):null;// 获取SelectionKey 
+        Object att = key!=null?key.attachment():null;// 获取selectionKey上的attachment
         return att;
     }
     /**

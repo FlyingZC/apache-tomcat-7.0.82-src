@@ -833,7 +833,7 @@ public abstract class AbstractEndpoint<S> {
         LimitLatch latch = connectionLimitLatch;
         if (latch!=null) latch.countUpOrAwait();
     }
-
+    /**连接计数减1*/
     protected long countDownConnection() {
         if (maxConnections==-1) return -1;
         LimitLatch latch = connectionLimitLatch;

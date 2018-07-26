@@ -196,7 +196,7 @@ public interface Lifecycle {
     public void removeLifecycleListener(LifecycleListener listener);
 
 
-    /**
+    /** 准备组件启动.此方法应执行任何初始化所需的后期对象创建.将会触发INIT_EVENT生命周期事件
      * Prepare the component for starting. This method should perform any
      * initialization required post object creation. The following
      * {@link LifecycleEvent}s will be fired in the following order:

@@ -45,7 +45,7 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
     private ObjectName oname = null;
     protected MBeanServer mserver = null;
     
-    /**
+    /** 将容器托管到JMX，便于运维管理
      * Sub-classes wishing to perform additional initialization should override
      * this method, ensuring that super.initInternal() is the first call in the
      * overriding method.
@@ -128,7 +128,7 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
     protected abstract String getObjectNameKeyProperties();
     
     
-    /**
+    /** 将容器作为MBean注册到MBeanServer
      * Utility method to enable sub-classes to easily register additional
      * components that don't implement {@link MBeanRegistration} with
      * an MBean server.<br/>
