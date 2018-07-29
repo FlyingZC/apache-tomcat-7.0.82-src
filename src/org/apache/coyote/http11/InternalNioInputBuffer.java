@@ -443,7 +443,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
             socket.getBufHandler().getReadBuffer().flip();// 调用ByteBuffer.flip()将buffer切换到读模式
             socket.getBufHandler().getReadBuffer().limit(nRead);// 设置buffer.limit
             expand(nRead + pos);// 检查当前对象的buf字节数组容量是否够大,若不够则扩容
-            socket.getBufHandler().getReadBuffer().get(buf, pos, nRead);// 将socket读取的数据 转移到当前对象的buf数组中
+            socket.getBufHandler().getReadBuffer().get(buf, pos, nRead);// 将socket读取的数据 转移到当前对象的buf数组中. public ByteBuffer get(byte[] dst,int offset,int length)此方法将此缓冲区的字节传输到给定的目标数组dest中
             lastValid = pos + nRead;// 更新最后一个有效数据的下标
             return nRead;
         } else if (nRead == -1) {// 若-1,表示出错了
@@ -762,12 +762,12 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
     @Override
     protected void init(SocketWrapper<NioChannel> socketWrapper,
             AbstractEndpoint<NioChannel> endpoint) throws IOException {
-
+        // socketWrapper为KeyAttachment对象
         socket = socketWrapper.getSocket();// 获取NioChannel
         socketReadBufferSize =
             socket.getBufHandler().getReadBuffer().capacity();// 获取nio.buffer的容量
 
-        int bufLength = headerBufferSize + socketReadBufferSize;
+        int bufLength = headerBufferSize + socketReadBufferSize;// 允许的最大header大小 + nio.buffer的容量
         if (buf == null || buf.length < bufLength) {
             buf = new byte[bufLength];// 初始化buf数组的大小
         }

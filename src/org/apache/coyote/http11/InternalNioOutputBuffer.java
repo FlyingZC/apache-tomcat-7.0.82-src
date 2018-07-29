@@ -179,9 +179,9 @@ public class InternalNioOutputBuffer extends AbstractOutputBuffer<NioChannel> {
     @Override
     public void init(SocketWrapper<NioChannel> socketWrapper,
             AbstractEndpoint<NioChannel> endpoint) throws IOException {
-
+        // nioChannel
         socket = socketWrapper.getSocket();
-        pool = ((NioEndpoint)endpoint).getSelectorPool();
+        pool = ((NioEndpoint)endpoint).getSelectorPool();// selectorPool
     }
 
 

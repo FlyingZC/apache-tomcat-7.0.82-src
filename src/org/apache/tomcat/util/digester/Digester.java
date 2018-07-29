@@ -691,7 +691,7 @@ public class Digester extends DefaultHandler2 {
     }
 
 
-    /**
+    /** 返回SAXParser
      * Return the SAXParser we will use to parse the input stream.  If there
      * is a problem creating the parser, return <code>null</code>.
      */

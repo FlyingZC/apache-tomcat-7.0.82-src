@@ -386,7 +386,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
     }
 
 
-    /**
+    /** (线程安全的)返回与容器相关的classLoader.若没有返回父容器的classLoader
      * Return the Loader with which this Container is associated.  If there is
      * no associated Loader, return the Loader associated with our parent
      * Container (if any); otherwise, return <code>null</code>.
@@ -1252,10 +1252,10 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         if (pipeline instanceof Lifecycle)
             ((Lifecycle) pipeline).start();
 
-        // 设置Host状态为STARTING,此时会触发START_EVENT生命周期事件.HostConfig监听该事件,它会扫描Web部署目录.对于部署描述文件,WAR包,目录 会自动创建StandardContext实例,添加到Host并启动
+        // 设置容器状态为STARTING,此时会触发START_EVENT生命周期事件.
         setState(LifecycleState.STARTING);
 
-        // Start our thread. 启动Host层级的后台任务进程.Cluster后台任务(包括部署变更检测,心跳).Realm后台任务处理.Pipeline中Value的后台任务处理(如果有定时处理任务)
+        // Start our thread. 启动不同层级的后台任务进程(不同容器调用,则启动不同容器的后台线程).Cluster后台任务(包括部署变更检测,心跳).Realm后台任务处理.Pipeline中Value的后台任务处理(如果有定时处理任务)
         threadStart();
 
     }

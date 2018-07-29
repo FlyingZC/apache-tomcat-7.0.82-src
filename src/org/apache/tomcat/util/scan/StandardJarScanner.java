@@ -39,7 +39,7 @@ import org.apache.tomcat.util.buf.UriUtil;
 import org.apache.tomcat.util.file.Matcher;
 import org.apache.tomcat.util.res.StringManager;
 
-/**
+/** 扫描WEB-INF/lib目录下的jar包
  * The default {@link JarScanner} implementation scans the WEB-INF/lib directory
  * followed by the provided classloader and then works up the classloader
  * hierarchy. This implementation is sufficient to meet the requirements of the

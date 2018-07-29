@@ -574,7 +574,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         @SuppressWarnings("deprecation") // Old HTTP upgrade method has been deprecated
         public SocketState process(SocketWrapper<S> wrapper,
                 SocketStatus status) {
-            if (wrapper == null) {
+            if (wrapper == null) {// wrapper为keyAttachment对象
                 // Nothing to do. Socket has been closed.
                 return SocketState.CLOSED;
             }
@@ -634,7 +634,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                     } else if (processor.isUpgrade()) {
                         state = processor.upgradeDispatch(status);
                     } else {
-                        state = processor.process(wrapper);// 处理同步socket请求.http11Processor.process(socketWrapper)
+                        state = processor.process(wrapper);// 处理socket请求.调用Http11Processor或Http11NioProcessor等的process(socketWrapper)方法
                     }
 
                     if (state != SocketState.CLOSED && processor.isAsync()) {

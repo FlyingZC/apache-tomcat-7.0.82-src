@@ -46,7 +46,7 @@ import org.apache.catalina.core.ApplicationTaglibDescriptor;
 import org.apache.tomcat.util.descriptor.XmlIdentifiers;
 import org.apache.tomcat.util.res.StringManager;
 
-/**
+/** 表示web.xml和web-fragment.xml.提供
  * Representation of common elements of web.xml and web-fragment.xml. Provides
  * a repository for parsed data before the elements are merged.
  * Validation is spread between multiple classes:

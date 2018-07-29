@@ -107,7 +107,7 @@ public final class ContextName {
         }
     }
     
-    /**
+    /** ContextName的构造方法.创建一个 含有path和version属性的实例.如/MyServlet加版本号
      * Construct an instance from a path and version.
      * 
      * @param path      Context path to use

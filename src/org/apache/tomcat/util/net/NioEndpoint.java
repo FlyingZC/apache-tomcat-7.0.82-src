@@ -1063,7 +1063,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
             }
         }
 
-        /** 从events队列中取出pollerEvent对象并run();即处理轮询器的事件队列中的事件,若事件队列是空的则返回false。
+        /** 从events队列中取出pollerEvent对象并run();即处理轮询器的事件队列中的事件,若事件队列是空的则返回false,否则返回true
          * Processes events in the event queue of the Poller.
          *
          * @return <code>true</code> if some events were processed,
@@ -1190,7 +1190,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     boolean hasEvents = false;
 
                     // Time to terminate?
-                    if (close) {
+                    if (close) {// 关闭走这
                         events();// 处理轮询器的事件队列中的事件
                         timeout(0, false);
                         try {
@@ -1200,11 +1200,11 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                                     "endpoint.nio.selectorCloseFail"), ioe);
                         }
                         break;
-                    } else {
+                    } else {// 默认 未关闭,走这
                         hasEvents = events();// 处理轮询器的事件队列中的事件!!!
                     }
                     try {
-                        if ( !close ) {
+                        if ( !close ) {// 未关闭
                             if (wakeupCounter.getAndSet(-1) > 0) {// 把wakeupCounter设置成-1并返回旧值,与addEvent()里的代码相呼应,这样会唤醒selector
                                 //if we are here, means we have other stuff to do.到这一步,说明有请求需要处理了
                                 //do a non blocking select.开启非阻塞select
@@ -1240,7 +1240,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                         log.error("",x);
                         continue;
                     }
-                    //either we timed out or we woke up, process events first
+                    //either we timed out or we woke up, process events first.要么超时 或 wake up,先处理events
                     if ( keyCount == 0 ) hasEvents = (hasEvents | events());
 
                     Iterator<SelectionKey> iterator =
@@ -1250,7 +1250,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     while (iterator != null && iterator.hasNext()) {
                         SelectionKey sk = iterator.next();
                         KeyAttachment attachment = (KeyAttachment)sk.attachment();// 这里的attachment()返回的就是在register()中注册的.KeyAttachement对视是对socket的包装类
-                        // Attachment may be null if another thread has called
+                        // Attachment may be null if another thread has called.如果另一个线程调用,则附件可能为null
                         // cancelledKey()
                         if (attachment == null) {
                             iterator.remove();
@@ -1301,7 +1301,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                                 boolean closeSocket = false;
                                 // Read goes before write
                                 if (sk.isReadable()) {
-                                    if (!processSocket(channel, SocketStatus.OPEN_READ, true)) {// 通道 读数据
+                                    if (!processSocket(channel, SocketStatus.OPEN_READ, true)) {// 处理 通道 读数据
                                         closeSocket = true;
                                     }
                                 }
@@ -1655,7 +1655,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
     public static class NioBufferHandler implements ApplicationBufferHandler {
         protected ByteBuffer readbuf = null;
         protected ByteBuffer writebuf = null;
-        /**构造方法,为buffer分配空间*/
+        /**构造方法,为buffer分配空间.传入读buffer大小,写buffer大小,是否使用直接内存*/
         public NioBufferHandler(int readsize, int writesize, boolean direct) {
             if ( direct ) {
                 readbuf = ByteBuffer.allocateDirect(readsize);
@@ -1693,7 +1693,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
 
 
     // ---------------------------------------------- SocketProcessor Inner Class
-    /**
+    /** 这个类相当于Worker，但它只会在外部Executor线程池中使用。
      * This class is the equivalent of the Worker, but will simply use in an
      * external Executor thread pool.
      */
@@ -1714,7 +1714,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
         @Override
         public void run() {// 1.使用nio方式 读取套接字 并进行处理, 输出响应报文;2.连接计数器减1腾出通道;3.关闭套接字
             SelectionKey key = socket.getIOChannel().keyFor(
-                    socket.getPoller().getSelector());// 从socket中获取SelectionKey
+                    socket.getPoller().getSelector());// 从socket中获取SelectionKey.即nioChannel.keyFor(selector)
             KeyAttachment ka = null;
 
             if (key != null) {
@@ -1730,7 +1730,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     doRun(key, ka);// socketProcessor的具体逻辑
                 }
             } else {
-                synchronized (socket) {
+                synchronized (socket) {// 对成员变量nioChannel(即socket)加锁
                     doRun(key, ka);// socketProcessor的具体逻辑
                 }
             }

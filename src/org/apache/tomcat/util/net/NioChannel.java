@@ -125,7 +125,7 @@ public class NioChannel implements ByteChannel{
         return sc.write(src);
     }
 
-    /**
+    /** 写数据到buffer中.(从channel中读数据,写入到buffer中)
      * Reads a sequence of bytes from this channel into the given buffer.
      *
      * @param dst The buffer into which bytes are to be transferred
@@ -135,7 +135,7 @@ public class NioChannel implements ByteChannel{
      */
     @Override
     public int read(ByteBuffer dst) throws IOException {
-        return sc.read(dst);
+        return sc.read(dst);// read into buffer. 从channel中读,写到Buffer中
     }
 
     public Object getAttachment() {

@@ -27,7 +27,7 @@ import javax.servlet.ServletContext;
  */
 public interface JarScanner {
 
-    /**
+    /** 使用指定的classloader扫描jar包.当每个jar包处理完毕 会回调相应的JarScannerCallback
      * Scan the provided ServletContext and classloader for JAR files. Each JAR
      * file found will be passed to the callback handler to be processed.
      *
@@ -35,8 +35,8 @@ public interface JarScanner {
      *                      WEB-INF/lib
      * @param classloader   The classloader - used to access JARs not in
      *                      WEB-INF/lib
-     * @param callback      The handler to process any JARs found
-     * @param jarsToSkip    List of JARs to ignore
+     * @param callback      The handler to process any JARs found.对发现的jar包的处理逻辑callback
+     * @param jarsToSkip    List of JARs to ignore.需要忽略的jar包
      */
     public void scan(ServletContext context, ClassLoader classloader,
             JarScannerCallback callback, Set<String> jarsToSkip);

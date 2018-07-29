@@ -477,7 +477,7 @@ public class HostConfig
     }
 
 
-    /**
+    /** E:\Java\apache-tomcat-7.0.82-01\conf\Catalina\localhost
      * Return a File object representing the "configuration root" directory
      * for our associated Host.
      */
