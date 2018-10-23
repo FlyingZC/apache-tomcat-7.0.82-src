@@ -170,7 +170,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         new HashMap<String, Container>();
 
 
-    /**
+    /** 设置后台线程的间隔时间
      * The processor delay for this component.
      */
     protected int backgroundProcessorDelay = -1;
@@ -1182,7 +1182,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
     }
 
-
+    /**初始化startStopExecutor,用于管理启动和关闭的线程*/
     @Override
     protected void initInternal() throws LifecycleException {
         BlockingQueue<Runnable> startStopQueue =
@@ -1230,7 +1230,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         Container children[] = findChildren();
         List<Future<Void>> results = new ArrayList<Future<Void>>();
         for (int i = 0; i < children.length; i++) {// 提交 启动子容器的任务.并阻塞当前线程等待执行结果
-            results.add(startStopExecutor.submit(new StartChild(children[i])));
+            results.add(startStopExecutor.submit(new StartChild(children[i])));// 子容器使用startStopExecutor调用新线程来启动
         }
 
         boolean fail = false;
@@ -1248,14 +1248,14 @@ public abstract class ContainerBase extends LifecycleMBeanBase
                     sm.getString("containerBase.threadedStartFailed"));
         }
 
-        // Start the Valves in our pipeline (including the basic), if any.启动Host持有的Pipeline组件.若有管道,则启动
+        // Start the Valves in our pipeline (including the basic), if any.启动容器持有的Pipeline组件的Value.若有管道,则启动
         if (pipeline instanceof Lifecycle)
             ((Lifecycle) pipeline).start();
 
         // 设置容器状态为STARTING,此时会触发START_EVENT生命周期事件.
         setState(LifecycleState.STARTING);
 
-        // Start our thread. 启动不同层级的后台任务进程(不同容器调用,则启动不同容器的后台线程).Cluster后台任务(包括部署变更检测,心跳).Realm后台任务处理.Pipeline中Value的后台任务处理(如果有定时处理任务)
+        // Start our thread. 启动该层级的后台定时任务进程(不同容器调用,则启动不同容器的后台线程).用于处理如Cluster后台任务(包括部署变更检测,心跳).Realm后台任务处理.Pipeline中Value的后台任务处理(如果有定时处理任务)
         threadStart();
 
     }
@@ -1646,7 +1646,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
                         if (parent.getLoader() != null) {
                             cl = parent.getLoader().getClassLoader();
                         }
-                        processChildren(parent, cl);
+                        processChildren(parent, cl);// 调用容器 和 子容器的后台处理程序backgroundProcess方法
                     }
                 }
             } catch (RuntimeException e) {

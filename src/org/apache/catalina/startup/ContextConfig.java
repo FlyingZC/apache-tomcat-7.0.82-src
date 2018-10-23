@@ -884,7 +884,7 @@ public class ContextConfig implements LifecycleListener {
                     Boolean.valueOf(context.getXmlValidation()),
                     Boolean.valueOf(context.getXmlNamespaceAware())));
         }
-
+        // 解析web.xml,创建Wrapper,使用addChild添加到Context中
         webConfig();
 
         if (!context.getIgnoreAnnotations()) {

@@ -411,19 +411,19 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         }
     }
 
-    /**
+    /** 该方法进入一个循环,让主线程不会退出.让服务器进入等待状态.<Server port="8005" shutdown="SHUTDOWN">
      * Wait until a proper shutdown command is received, then return.
      * This keeps the main thread alive - the thread pool listening for http 
      * connections is daemon threads.
      */
     @Override
     public void await() {
-        // Negative values - don't wait on port - tomcat is embedded or we just don't like ports
+        // Negative values - don't wait on port - tomcat is embedded or we just don't like ports.若端口为-2则不进入循环,直接返回
         if( port == -2 ) {
             // undocumented yet - for embedding apps that are around, alive.
             return;
         }
-        if( port==-1 ) {
+        if( port==-1 ) {// 若端口为-1则进入循环,且无法通过网络退出
             try {
                 awaitThread = Thread.currentThread();
                 while(!stopAwait) {
@@ -439,7 +439,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
             return;
         }
 
-        // Set up a server socket to wait on
+        // Set up a server socket to wait on.若端口不是-1和-2(应大于0),则会新建一个监听关闭命令的ServerSocket
         try {
             awaitSocket = new ServerSocket(port, 1,
                     InetAddress.getByName(address));
@@ -522,9 +522,9 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
                     }
                 }
 
-                // Match against our command string
+                // Match against our command string.检查在指定端口接收到的命令是否和shutdown命令相匹配
                 boolean match = command.toString().equals(shutdown);
-                if (match) {
+                if (match) {// 若匹配则跳出循环
                     log.info(sm.getString("standardServer.shutdownViaPort"));
                     break;
                 } else

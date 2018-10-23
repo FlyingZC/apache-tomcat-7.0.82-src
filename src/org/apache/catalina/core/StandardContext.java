@@ -5003,7 +5003,7 @@ public class StandardContext extends ContainerBase
     }
 
 
-    /**
+    /** 触发listener
      * Configure the set of instantiated application event listeners
      * for this Context.  Return <code>true</code> if all listeners wre
      * initialized successfully, or <code>false</code> otherwise.
@@ -5630,7 +5630,7 @@ public class StandardContext extends ContainerBase
 
             // Configure and call application event listeners
             if (ok) {
-                if (!listenerStart()) {
+                if (!listenerStart()) {// 触发listener.调用配置在listener.contextInitialized()方法
                     log.error(sm.getString("standardContext.listenerFail"));
                     ok = false;
                 }
@@ -5648,7 +5648,7 @@ public class StandardContext extends ContainerBase
             }
 
             // Configure and call application filters
-            if (ok) {
+            if (ok) {// 初始化filter.
                 if (!filterStart()) {
                     log.error(sm.getString("standardContext.filterFail"));
                     ok = false;
@@ -5656,7 +5656,7 @@ public class StandardContext extends ContainerBase
             }
 
             // Load and initialize all "load on startup" servlets
-            if (ok) {
+            if (ok) {// 初始化servlets.调用load-on-startup的servlet的init()方法
                 if (!loadOnStartup(findChildren())){
                     log.error(sm.getString("standardContext.servletFail"));
                     ok = false;

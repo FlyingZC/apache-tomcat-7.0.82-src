@@ -334,7 +334,7 @@ public class StandardWrapper extends ContainerBase
     }
 
 
-    /**
+    /** 设置Wrapper所包含的Servlet有效的起始时间,若所设置的时间为将来的时间,那么调用所对应的servlet就会产生错误,直到过了设置的事件后才能正常调用.若设置成Long.MAX_VALUE就一直不能调用了
      * Set the available date/time for this servlet, in milliseconds since the
      * epoch.  If this date/time is Long.MAX_VALUE, it is considered to mean
      * that unavailability is permanent and any request for this servlet will return
@@ -1788,7 +1788,7 @@ public class StandardWrapper extends ContainerBase
     @Override
     protected synchronized void startInternal() throws LifecycleException {
     
-        // Send j2ee.state.starting notification 
+        // Send j2ee.state.starting notification.用broadcaster发送通知,用于JMX 
         if (this.getObjectName() != null) {
             Notification notification = new Notification("j2ee.state.starting", 
                                                         this.getObjectName(), 
@@ -1798,7 +1798,7 @@ public class StandardWrapper extends ContainerBase
         
         // Start up this component
         super.startInternal();
-
+        // 调用setAvailable让Servlet有效
         setAvailable(0L);
 
         // Send j2ee.state.running notification 
