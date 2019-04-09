@@ -27,7 +27,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
+/** 处理WebSocket连接的初始HTTP连接
  * Handles the initial HTTP connection for WebSocket connections.
  */
 public class WsFilter implements Filter {

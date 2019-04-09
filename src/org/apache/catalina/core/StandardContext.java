@@ -5013,7 +5013,7 @@ public class StandardContext extends ContainerBase
         if (log.isDebugEnabled())
             log.debug("Configuring application event listeners");
 
-        // Instantiate the required listeners
+        // Instantiate the required listeners.若使用springmvc,web.xml中一般会配置一个org.springframework.web.context.ContextLoaderListener
         ApplicationListener listeners[] = applicationListeners;
         Object results[] = new Object[listeners.length];
         boolean ok = true;

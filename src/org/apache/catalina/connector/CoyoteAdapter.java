@@ -656,7 +656,7 @@ public class CoyoteAdapter implements Adapter {
     // ------------------------------------------------------ Protected Methods
 
 
-    /** 解析额外的请求参数。根据请求路径匹配的结果,按照会话等信息获取最终的映射结果(可能结果又多个)
+    /** 解析额外的请求参数。根据请求路径匹配的结果,按照会话等信息获取最终的映射结果(可能结果有多个)
      * Parse additional request parameters.
      */
     protected boolean postParseRequest(org.apache.coyote.Request req,

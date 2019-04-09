@@ -70,7 +70,7 @@ public final class ApplicationFilterFactory {
     // --------------------------------------------------------- Public Methods
 
 
-    /** 先是创建ApplicationFilterChain实例，再向filterChain中添加和该servlet匹配的各种filter
+    /** 先是创建ApplicationFilterChain实例,再向filterChain中添加和该servlet匹配的各种filter
      * Return the factory instance.
      */
     public static ApplicationFilterFactory getInstance() {
@@ -135,7 +135,7 @@ public final class ApplicationFilterFactory {
             filterChain = new ApplicationFilterChain();
         }
 
-        filterChain.setServlet(servlet);// 关联servlet
+        filterChain.setServlet(servlet);// filterChain关联servlet.如果是springmvc,此处的servlet即为DispatcherServlet实例
 
         filterChain.setSupport
             (((StandardWrapper)wrapper).getInstanceSupport());
@@ -183,7 +183,7 @@ public final class ApplicationFilterFactory {
             }
         }
 
-        // Add filters that match on servlet name second. 添加匹配 servelt名字的filter
+        // Add filters that match on servlet name second.添加与servlet名称匹配的过滤器
         for (int i = 0; i < filterMaps.length; i++) {
             if (!matchDispatcher(filterMaps[i] ,dispatcher)) {
                 continue;

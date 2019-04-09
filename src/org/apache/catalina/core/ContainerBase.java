@@ -1236,7 +1236,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         boolean fail = false;
         for (Future<Void> result : results) {// 启动 多个子容器的结果
             try {
-                result.get();
+                result.get();// 阻塞直到所有子容器启动完毕
             } catch (Exception e) {
                 log.error(sm.getString("containerBase.threadedStartFailed"), e);
                 fail = true;

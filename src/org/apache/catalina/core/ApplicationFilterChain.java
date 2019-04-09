@@ -43,7 +43,7 @@ import org.apache.catalina.util.InstanceSupport;
 import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.res.StringManager;
 
-/** 代表一个过滤器链实体，请求在到达对应servlet之前会先 经过该实例拥有的所有filter。
+/** 代表一个过滤器链实体,请求在到达对应servlet之前会先 经过该实例拥有的所有filter
  * Implementation of <code>javax.servlet.FilterChain</code> used to manage
  * the execution of a set of filters for a particular request.  When the
  * set of defined filters has all been executed, the next call to
@@ -213,7 +213,7 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
                                   ServletResponse response)
         throws IOException, ServletException {
 
-        // Call the next filter if there is one
+        // Call the next filter if there is one.如果有,调用下一个过滤器
         if (pos < n) {
             ApplicationFilterConfig filterConfig = filters[pos++];
             Filter filter = null;
@@ -238,7 +238,7 @@ final class ApplicationFilterChain implements FilterChain, CometFilterChain {
                         ("doFilter", filter, classType, args, principal);
                     
                 } else {  
-                    filter.doFilter(request, response, this);// 调用具体filter.doFilter方法
+                    filter.doFilter(request, response, this);// 调用具体filter.doFilter()方法
                 }
 
                 support.fireInstanceEvent(InstanceEvent.AFTER_FILTER_EVENT,

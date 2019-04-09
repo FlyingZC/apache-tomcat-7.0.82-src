@@ -814,7 +814,7 @@ public class StandardWrapper extends ContainerBase
     }
 
 
-    /**
+    /** 分配servlet实例.若servlet未实现SingleThreadModel接口,则返回创建的单例
      * Allocate an initialized instance of this Servlet that is ready to have
      * its <code>service()</code> method called.  If the servlet class does
      * not implement <code>SingleThreadModel</code>, the (only) initialized
@@ -831,16 +831,16 @@ public class StandardWrapper extends ContainerBase
     public Servlet allocate() throws ServletException {
 
         // If we are currently unloading this servlet, throw an exception
-        if (unloading) {
+        if (unloading) {// 正在加载servlet中
             throw new ServletException(sm.getString("standardWrapper.unloading", getName()));
         }
 
         boolean newInstance = false;
         
-        // If not SingleThreadedModel, return the same instance every time.默认不是
+        // If not SingleThreadedModel, return the same instance every time.默认不是. 若未实现SingleThreadedModel接口,每次返回相同的实例
         if (!singleThreadModel) {
             // Load and initialize our instance if necessary
-            if (instance == null || !instanceInitialized) {
+            if (instance == null || !instanceInitialized) {// 创建servlet
                 synchronized (this) {
                     if (instance == null) {
                         try {
@@ -935,7 +935,7 @@ public class StandardWrapper extends ContainerBase
     @Override
     public void deallocate(Servlet servlet) throws ServletException {
 
-        // If not SingleThreadModel, no action is required
+        // If not SingleThreadModel, no action is required.如果不是SingleThreadModel(即是普通servlet),则不需要任何操作
         if (!singleThreadModel) {
             countAllocated.decrementAndGet();
             return;

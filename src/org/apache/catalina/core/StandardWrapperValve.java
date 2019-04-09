@@ -80,7 +80,7 @@ final class StandardWrapperValve
     // --------------------------------------------------------- Public Methods
 
 
-    /**
+    /** 调用servlet.尊重有关servlet生命周期和SingleThreadModel支持的规则
      * Invoke the servlet we are managing, respecting the rules regarding
      * servlet lifecycle and SingleThreadModel support.
      *
@@ -99,19 +99,19 @@ final class StandardWrapperValve
         Throwable throwable = null;
         // This should be a Request attribute...
         long t1=System.currentTimeMillis();
-        requestCount.incrementAndGet();
+        requestCount.incrementAndGet();// servlet请求计数
         StandardWrapper wrapper = (StandardWrapper) getContainer();
         Servlet servlet = null;
         Context context = (Context) wrapper.getParent();
 
-        // Check for the application being marked unavailable
+        // Check for the application being marked unavailable.检查host是否可用
         if (!context.getState().isAvailable()) {
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
                            sm.getString("standardContext.isUnavailable"));
             unavailable = true;
         }
 
-        // Check for the servlet being marked unavailable
+        // Check for the servlet being marked unavailable.检查wrapper是否可用
         if (!unavailable && wrapper.isUnavailable()) {
             container.getLogger().info(sm.getString("standardWrapper.isUnavailable",
                     wrapper.getName()));
@@ -129,7 +129,7 @@ final class StandardWrapperValve
             unavailable = true;
         }
 
-        // Allocate a servlet instance to process this request
+        // Allocate a servlet instance to process this request.分配servlet实例处理该请求
         try {
             if (!unavailable) {
                 servlet = wrapper.allocate();
@@ -163,7 +163,7 @@ final class StandardWrapperValve
             servlet = null;
         }
 
-        // Identify if the request is Comet related now that the servlet has been allocated
+        // Identify if the request is Comet related now that the servlet has been allocated.现在已经分配了servlet,确定请求是否与Comet相关
         boolean comet = false;
         if (servlet instanceof CometProcessor && Boolean.TRUE.equals(request.getAttribute(
                 Globals.COMET_SUPPORTED_ATTR))) {
@@ -281,7 +281,7 @@ final class StandardWrapperValve
             }
         }
 
-        // Deallocate the allocated servlet instance.释放servlet链
+        // Deallocate the allocated servlet instance.释放已分配的servlet实例
         try {
             if (servlet != null) {
                 wrapper.deallocate(servlet);
