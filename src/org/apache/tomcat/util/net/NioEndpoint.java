@@ -351,7 +351,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
      * Return an available poller in true round robin fashion
      */
     public Poller getPoller0() {
-        int idx = Math.abs(pollerRotater.incrementAndGet()) % pollers.length;// 最简单的轮询调度三方,poller的计数器不断加1 再对poller数组长度 取余数
+        int idx = Math.abs(pollerRotater.incrementAndGet()) % pollers.length;// 最简单的轮询调度方法,poller的计数器不断加1 再对poller数组长度 取余数
         return pollers[idx];
     }
 
@@ -472,7 +472,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
         serverSock = ServerSocketChannel.open();
         socketProperties.setProperties(serverSock.socket());
         InetSocketAddress addr = (getAddress()!=null?new InetSocketAddress(getAddress(),getPort()):new InetSocketAddress(getPort()));
-        serverSock.socket().bind(addr,getBacklog());// 绑定ip地址
+        serverSock.socket().bind(addr,getBacklog());// 绑定ip地址,backlog默认值为100
         serverSock.configureBlocking(true); //mimic APR behavior 设置成阻塞模式
         serverSock.socket().setSoTimeout(getSocketProperties().getSoTimeout());// 设置超时.超时抛java.net.SocketTimeoutException
 
@@ -1076,7 +1076,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
             while ( (r = events.poll()) != null ) {// 从events队列 中 逐个取出PollerEvent事件,并执行相应的事件线程
                 result = true;
                 try {
-                    r.run();// 运行每一个PollerEvent的处理逻辑
+                    r.run();// 运行每一个PollerEvent的处理逻辑.这里直接调用的是run()方法,所以下面的代码会等待此处走完再往下走
                     if ( r instanceof PollerEvent ) {// 只要从events中取出后,便便重置PollerEvent并缓存到eventCache中,方便复用PollerEvent对象
                         ((PollerEvent)r).reset();
                         eventCache.offer((PollerEvent)r);
@@ -1181,7 +1181,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     // Loop if endpoint is paused
                     while (paused && (!close) ) {
                         try {
-                            Thread.sleep(100);// 0.1s轮询一次
+                            Thread.sleep(100);// 如果是paused状态, 0.1s轮询一次
                         } catch (InterruptedException e) {
                             // Ignore
                         }

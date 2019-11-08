@@ -349,8 +349,8 @@ public class HostConfig
 
         // Identify the host we are associated with
         try {
-            host = (Host) event.getLifecycle();// 当前所监听的lifecycle对象，这里监听的是host对象
-            if (host instanceof StandardHost) {// 根据host的信息，来设置一些配置
+            host = (Host) event.getLifecycle(); // 当前所监听的 lifecycle 对象,这里监听的是 host 对象
+            if (host instanceof StandardHost) { // 根据 host 的信息,来设置一些配置
                 setCopyXML(((StandardHost) host).isCopyXML());
                 setDeployXML(((StandardHost) host).isDeployXML());
                 setUnpackWARs(((StandardHost) host).isUnpackWARs());
@@ -363,11 +363,11 @@ public class HostConfig
 
         // Process the event that has occurred. 处理生命周期事件
         if (event.getType().equals(Lifecycle.PERIODIC_EVENT)) {
-            check();// 后台处理完成后事件.通过DeployedApplication维护了两个守护资源列表.redeployResources(守护导致应用重新部署的资源)和reloadResources(守护导致应用重新加载的资源).检测资源变更,重新加载或部署并更新最后修改时间
+            check(); // 后台处理完成后事件.通过 DeployedApplication 维护了两个守护资源列表.redeployResources(守护导致应用重新部署的资源)和 reloadResources(守护导致应用重新加载的资源).检测资源变更,重新加载或部署并更新最后修改时间
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {
             beforeStart();
-        } else if (event.getType().equals(Lifecycle.START_EVENT)) {// start事件
-            start();// Host启动时触发,完成服务器启动过程中的 Web应用部署.需要 Host的deployOnstartup="true"才会在服务器启动时部署web应用.  autoDeploy
+        } else if (event.getType().equals(Lifecycle.START_EVENT)) { // start 事件
+            start(); // Host 启动时触发,完成服务器启动过程中的 Web 应用部署.需要 Host 的 deployOnstartup="true" 才会在服务器启动时部署 web 应用
         } else if (event.getType().equals(Lifecycle.STOP_EVENT)) {
             stop();
         }
@@ -519,10 +519,10 @@ public class HostConfig
      */
     protected void deployApps() {
 
-        File appBase = appBase();// 应用根目录
+        File appBase = appBase(); // 应用根目录
         File configBase = configBase();
         String[] filteredAppPaths = filterAppPaths(appBase.list());
-        // Deploy XML descriptors from configBase.  // 根据Context.xml描述文件部署.<Context docBase="test/myApp" path="/myApp" reloadable="false"><WatchedResource>/WEB-INF/web.xml</WatchedResource></Context>
+        // Deploy XML descriptors from configBase.  // 根据 Context.xml 描述文件部署.<Context docBase="test/myApp" path="/myApp" reloadable="false"><WatchedResource>/WEB-INF/web.xml</WatchedResource></Context>
         deployDescriptors(configBase, configBase.list());
         // Deploy WARs. WAR包部署
         deployWARs(appBase, filteredAppPaths);
@@ -1165,7 +1165,7 @@ public class HostConfig
     }
 
 
-    /** web目录部署.使用时只需将包含web应用所有资源文件 复制到Host指定appBase目录下即可
+    /** web 目录部署.使用时只需将包含 web 应用所有资源文件 复制到 Host 指定 appBase 目录下即可
      * Deploy directories.
      */
     protected void deployDirectories(File appBase, String[] files) {
@@ -1175,21 +1175,21 @@ public class HostConfig
 
         ExecutorService es = host.getStartStopExecutor();
         List<Future<?>> results = new ArrayList<Future<?>>();
-        // 对Host的appBase目录(默认为$CATALINA_BASE/webapps)下所有符合条件的目录由线程池完成部署
+        // 对 Host 的 appBase 目录(默认为 $CATALINA_BASE/webapps)下所有符合条件的目录由线程池完成部署
         for (int i = 0; i < files.length; i++) {
 
-            if (files[i].equalsIgnoreCase("META-INF"))//排除
+            if (files[i].equalsIgnoreCase("META-INF")) // 排除
                 continue;
-            if (files[i].equalsIgnoreCase("WEB-INF"))//排除
+            if (files[i].equalsIgnoreCase("WEB-INF")) // 排除
                 continue;
             File dir = new File(appBase, files[i]);
-            if (dir.isDirectory()) {// 对于每个目录的操作
+            if (dir.isDirectory()) { // 对于每个目录的操作
                 ContextName cn = new ContextName(files[i], false);
 
                 if (isServiced(cn.getName()) || deploymentExists(cn.getName()))
                     continue;
 
-                results.add(es.submit(new DeployDirectory(this, cn, dir)));// 每个线程对于每个目录的部署操作
+                results.add(es.submit(new DeployDirectory(this, cn, dir))); // 每个线程对于每个目录的部署操作
             }
         }
 
@@ -1204,7 +1204,7 @@ public class HostConfig
     }
 
 
-    /**每个线程对于web目录的部署操作
+    /** 每个线程对于 web 目录的部署操作
      * @param cn
      * @param dir
      */
@@ -1228,7 +1228,7 @@ public class HostConfig
         boolean deployThisXML = isDeployThisXML(dir, cn);
 
         try {
-            if (deployThisXML && xml.exists()) {// 存在META-INF/context.xml,则使用digester解析context.xml创建context对象
+            if (deployThisXML && xml.exists()) { // 存在 META-INF/context.xml,则使用 digester 解析 context.xml,创建 context 对象
                 synchronized (digesterLock) {
                     try {
                         context = (Context) digester.parse(xml);
@@ -1720,7 +1720,7 @@ public class HostConfig
     }
 
 
-    /** Host启动时触发,完成服务器启动过程中的 Web应用部署.需要 Host的deployOnstartup="true"才会在服务器启动时部署web应用.  autoDeploy
+    /** Host 启动时触发,完成服务器启动过程中的 Web 应用部署.需要 Host 的 deployOnstartup="true" 才会在服务器启动时部署web应用
      * Process a "start" event for this Host.
      */
     public void start() {
@@ -1745,8 +1745,8 @@ public class HostConfig
             host.setAutoDeploy(false);
         }
 
-        if (host.getDeployOnStartup())// 需要 Host的deployOnstartup="true"才会在服务器启动时部署web应用.
-            deployApps();// 部署应用
+        if (host.getDeployOnStartup()) // 需要 Host 的 deployOnstartup="true" 才会在服务器启动时部署 web 应用
+            deployApps(); // 部署应用
 
     }
 
@@ -1770,11 +1770,11 @@ public class HostConfig
     }
 
 
-    /** 后台处理完成后事件.通过DeployedApplication维护了两个守护资源列表.redeployResources(守护导致应用重新部署的资源)和reloadResources(守护导致应用重新加载的资源).检测资源变更,重新加载或部署并更新最后修改时间
+    /** 后台处理完成后事件.通过 DeployedApplication 维护了两个守护资源列表.redeployResources(守护导致应用重新部署的资源)和 reloadResources(守护导致应用重新加载的资源).检测资源变更,重新加载或部署并更新最后修改时间
      * Check status of all webapps.
      */
     protected void check() {
-        // 当Host的autoDeploy=true才会有热部署
+        // 当 Host 的 autoDeploy=true 才会有热部署
         if (host.getAutoDeploy()) {
             // Check for resources modification to trigger redeployment
             DeployedApplication[] apps =
@@ -1896,7 +1896,7 @@ public class HostConfig
                 isWar = true;
             }
         }
-        host.addChild(context);
+        host.addChild(context); // 向 host 中添加 context 子容器
         // Add the eventual unpacked WAR and all the resources which will be
         // watched inside it
         boolean unpackWAR = unpackWARs;
@@ -2034,7 +2034,7 @@ public class HostConfig
         }
 
         @Override
-        public void run() {// 每个线程对于web目录的部署操作
+        public void run() { // 每个线程对于 web 目录的部署操作
             config.deployDirectory(cn, dir);
         }
     }

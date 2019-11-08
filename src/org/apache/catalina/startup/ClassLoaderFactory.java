@@ -160,11 +160,11 @@ public final class ClassLoaderFactory {
             log.debug("Creating new class loader");
 
         // Construct the "class path" for this class loader 保存类加载的路径
-        Set<URL> set = new LinkedHashSet<URL>();// 不重复且有序
+        Set<URL> set = new LinkedHashSet<URL>(); // 不重复且有序
 
         if (repositories != null) {
-            for (Repository repository : repositories)  {// 遍历repositories
-                if (repository.getType() == RepositoryType.URL) {// 若是URL类型
+            for (Repository repository : repositories)  { // 遍历 repositories
+                if (repository.getType() == RepositoryType.URL) { // 若是 URL 类型
                     URL url = buildClassLoaderUrl(repository.getLocation());
                     if (log.isDebugEnabled())
                         log.debug("  Including URL " + url);
@@ -185,10 +185,10 @@ public final class ClassLoaderFactory {
                     if (!validateFile(file, RepositoryType.JAR)) {
                         continue;
                     }
-                    URL url = buildClassLoaderUrl(file);// JAR类型资源也转换成new URL("file:/D:/test/test.jar")
+                    URL url = buildClassLoaderUrl(file); // JAR类型资源也转换成 new URL("file:/D:/test/test.jar")
                     if (log.isDebugEnabled())
                         log.debug("  Including jar file " + url);
-                    set.add(url);// 将这个URL实例添加到URL[]集合中
+                    set.add(url); // 将这个URL实例添加到 URL[] 集合中
                 } else if (repository.getType() == RepositoryType.GLOB) {
                     File directory=new File(repository.getLocation());
                     directory = directory.getCanonicalFile();
@@ -198,7 +198,7 @@ public final class ClassLoaderFactory {
                     if (log.isDebugEnabled())
                         log.debug("  Including directory glob "
                             + directory.getAbsolutePath());
-                    String filenames[] = directory.list();// 由于GLOB类型是 表示整个目录下所有的Jar包资源,仅仅是.jar后缀的资源.所以要遍历文件,找出所有Jar包资源
+                    String filenames[] = directory.list(); // 由于 GLOB 类型是 表示整个目录下所有的 Jar 包资源,仅仅是 .jar 后缀的资源.所以要遍历文件,找出所有 Jar 包资源
                     if (filenames == null) {
                         continue;
                     }
@@ -206,7 +206,7 @@ public final class ClassLoaderFactory {
                         String filename = filenames[j].toLowerCase(Locale.ENGLISH);
                         if (!filename.endsWith(".jar"))
                             continue;
-                        File file = new File(directory, filenames[j]);// 对.jar资源的处理
+                        File file = new File(directory, filenames[j]); // 对 .jar 资源的处理
                         file = file.getCanonicalFile();
                         if (!validateFile(file, RepositoryType.JAR)) {
                             continue;
@@ -221,19 +221,19 @@ public final class ClassLoaderFactory {
             }
         }
 
-        // Construct the class loader itself 创建classLoader
+        // Construct the class loader itself 创建 classLoader
         final URL[] array = set.toArray(new URL[set.size()]);
         if (log.isDebugEnabled())
             for (int i = 0; i < array.length; i++) {
                 log.debug("  location " + i + " is " + array[i]);
             }
 
-        return AccessController.doPrivileged(// 访问控制器,安全机制,获取更大的权限
+        return AccessController.doPrivileged( // 访问控制器,安全机制,获取更大的权限
                 new PrivilegedAction<URLClassLoader>() {
                     @Override
-                    public URLClassLoader run() {// 创建并返回新的类加载器
+                    public URLClassLoader run() { // 创建并返回新的类加载器
                         if (parent == null)
-                            return new URLClassLoader(array);// ClassLoaderFactory生成的类加载器是继承于URLClassLoader的,URLClassLoader构造函数需要传入URL[]数组
+                            return new URLClassLoader(array); // ClassLoaderFactory 生成的类加载器是继承于 URLClassLoader 的,URLClassLoader 构造函数需要传入URL[]数组
                         else
                             return new URLClassLoader(array, parent);
                     }
@@ -296,7 +296,7 @@ public final class ClassLoaderFactory {
 
     private static URL buildClassLoaderUrl(File file) throws MalformedURLException {
         // Could be a directory or a file
-        String fileUrlString = file.toURI().toString();// 本地文件类型的资源,需要把File类型转换为URL类型.由于URL类用于网络,带有明显的协议.所以本地文件协议定为file.即处理为new URL("file:/D:/test/")
+        String fileUrlString = file.toURI().toString(); // 本地文件类型的资源,需要把 File 类型 转换为 URL 类型.由于 URL 类用于网络,带有明显的协议.所以本地文件协议定为 file.即处理为 new URL("file:/D:/test/")
         fileUrlString = fileUrlString.replaceAll("!/", "%21/");
         return new URL(fileUrlString);
     }

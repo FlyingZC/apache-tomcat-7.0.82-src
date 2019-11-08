@@ -438,7 +438,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             log.info(sm.getString("standardService.start.name", this.name));
         setState(LifecycleState.STARTING);
 
-        // Start our defined Container first.启动container
+        // Start our defined Container first.启动 container
         if (container != null) {
             synchronized (container) {
                 container.start();
@@ -542,10 +542,10 @@ public class StandardService extends LifecycleMBeanBase implements Service {
         super.initInternal();
         
         if (container != null) {
-            container.init();// 初始化container.此处应为Engine
+            container.init(); // 初始化 container.此处应为 Engine
         }
 
-        // Initialize any Executors.初始化executors,即tomcat间可共享的线程池
+        // Initialize any Executors.初始化 executors,即 tomcat 间可共享的线程池
         for (Executor executor : findExecutors()) {
             if (executor instanceof LifecycleMBeanBase) {
                 ((LifecycleMBeanBase) executor).setDomain(getDomain());
@@ -553,7 +553,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             executor.init();
         }
 
-        // Initialize our defined Connectors.初始化connectors,实例化connector集合,默认两个,对应server.xml的connector元素配置
+        // Initialize our defined Connectors.初始化 connectors,实例化 connector 集合,默认两个,对应 server.xml 的 connector 元素配置
         synchronized (connectorsLock) {
             for (Connector connector : connectors) {
                 try {

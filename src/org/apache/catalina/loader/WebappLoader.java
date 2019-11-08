@@ -729,7 +729,7 @@ public class WebappLoader extends LifecycleMBeanBase
         Class<?>[] argTypes = { ClassLoader.class };
         Object[] args = { parentClassLoader };
         Constructor<?> constr = clazz.getConstructor(argTypes);
-        classLoader = (WebappClassLoaderBase) constr.newInstance(args);
+        classLoader = (WebappClassLoaderBase) constr.newInstance(args); // 反射调用ClassLoader的构造方法,设置 WebappClassLoader 的父加载器为 sharedLoader
 
         return classLoader;
 

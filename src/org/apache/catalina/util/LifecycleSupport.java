@@ -110,7 +110,7 @@ public final class LifecycleSupport {
      * @param data Event data
      */
     public void fireLifecycleEvent(String type, Object data) {
-        // 本类对象在LifecycleBase的成员变量声明private LifecycleSupport lifecycle = new LifecycleSupport(this); 所以此处lifecycle就是this指代的如StandServer等容器
+        // 本类对象在 LifecycleBase 的成员变量声明 private LifecycleSupport lifecycle = new LifecycleSupport(this); 所以此处 lifecycle 就是 this 指代的如 StandServer 等容器
         LifecycleEvent event = new LifecycleEvent(lifecycle, type, data);
         LifecycleListener interested[] = listeners;
         for (int i = 0; i < interested.length; i++)
