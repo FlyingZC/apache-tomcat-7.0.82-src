@@ -300,7 +300,7 @@ public class MapperListener extends LifecycleMBeanBase
     private void registerHost(Host host) {
 
         String[] aliases = host.findAliases();
-        mapper.addHost(host.getName(), aliases, host);
+        mapper.addHost(host.getName(), aliases, host);// 向 mapper中添加 host
 
         for (Container container : host.findChildren()) {
             if (container.getState().isAvailable()) {
@@ -374,7 +374,7 @@ public class MapperListener extends LifecycleMBeanBase
         List<WrapperMappingInfo> wrappers = new ArrayList<WrapperMappingInfo>();
 
         for (Container container : context.findChildren()) {
-            prepareWrapperMappingInfo(context, (Wrapper) container, wrappers);
+            prepareWrapperMappingInfo(context, (Wrapper) container, wrappers);// wrapper
 
             if(log.isDebugEnabled()) {
                 log.debug(sm.getString("mapperListener.registerWrapper",

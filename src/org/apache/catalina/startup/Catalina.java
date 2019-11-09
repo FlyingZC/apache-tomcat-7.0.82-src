@@ -294,7 +294,7 @@ public class Catalina {
     }
 
 
-    /**使用digester解析server.xml
+    /**使用 digester 解析 server.xml
      * Create and configure the Digester we will be using for startup.
      */
     protected Digester createStartDigester() {
@@ -535,7 +535,7 @@ public class Catalina {
     }
 
 
-    /** 加载配置资源，通过反射调用catalina.load方法，利用catalina.load方法创建digester实例，从而解析conf/server.xml文件
+    /** 加载配置资源.创建 digester 实例,解析 conf/server.xml 文件
      * Start a new server instance.
      */
     public void load() {
@@ -556,7 +556,7 @@ public class Catalina {
         File file = null;
         try {
             try {
-                file = configFile();// 获取conf/server.xml文件
+                file = configFile(); // 获取 conf/server.xml 文件
                 inputStream = new FileInputStream(file);
                 inputSource = new InputSource(file.toURI().toURL().toString());
             } catch (Exception e) {
@@ -614,7 +614,7 @@ public class Catalina {
             try {
                 inputSource.setByteStream(inputStream);
                 digester.push(this);
-                digester.parse(inputSource);// 解析conf/server.xml文件(SAX)，并根据规则初始化各个组件实例和关联关系：如server元素实例化standardServer实例对象，把属性内容set到对应实例中
+                digester.parse(inputSource); // 解析 conf/server.xml 文件(SAX),并根据规则初始化各个组件实例和关联关系：如 server 元素实例化 standardServer 实例对象,把属性内容 set 到对应实例中
             } catch (SAXParseException spe) {
                 log.warn("Catalina.start using " + getConfigFile() + ": " +
                         spe.getMessage());
@@ -632,7 +632,7 @@ public class Catalina {
                 }
             }
         }
-        // server关联catalina，在解析server.xml过程中，会发现父子元素对应实例的相互关联性(双向性)    
+        // server 关联 catalina,在解析 server.xml 过程中,会发现父子元素对应实例的相互关联性(双向性)
         getServer().setCatalina(this);
 
         // Stream redirection
@@ -640,7 +640,7 @@ public class Catalina {
 
         // Start the new server
         try {
-            getServer().init();// 调用各个组件的init方法，初始化各个组件  
+            getServer().init(); // 调用各个组件的 init() 方法,初始化各个组件
         } catch (LifecycleException e) {
             if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE")) {
                 throw new java.lang.Error(e);
@@ -800,7 +800,7 @@ public class Catalina {
 
     protected void initDirs() {
 
-        String catalinaHome = System.getProperty(Globals.CATALINA_HOME_PROP);// E:\Java\apache-tomcat-7.0.82-01
+        String catalinaHome = System.getProperty(Globals.CATALINA_HOME_PROP); // E:\Java\apache-tomcat-7.0.82-01
         if (catalinaHome == null) {
             // Backwards compatibility patch for J2EE RI 1.3
             String j2eeHome = System.getProperty("com.sun.enterprise.home");
@@ -829,7 +829,7 @@ public class Catalina {
         if (System.getProperty(Globals.CATALINA_BASE_PROP) == null) {
             System.setProperty(Globals.CATALINA_BASE_PROP,
                                catalinaHome);
-        } else {//catalina.base为  D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2
+        } else { // catalina.base 为  D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2
             String catalinaBase = System.getProperty(Globals.CATALINA_BASE_PROP);
             File base = new File(catalinaBase);
             if (!base.isAbsolute()) {

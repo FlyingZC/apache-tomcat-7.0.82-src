@@ -387,7 +387,7 @@ public class ContextConfig implements LifecycleListener {
         if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
             configureStart();
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {
-            beforeStart();// 在context启动前触发,用于更新Context的docBase属性 和 解决web目录锁的问题
+            beforeStart(); // 在 context 启动前触发,用于更新 Context 的 docBase 属性 和 解决 web 目录锁的问题
         } else if (event.getType().equals(Lifecycle.AFTER_START_EVENT)) {
             // Restore docBase for management tools
             if (originalDocBase != null) {
@@ -396,7 +396,7 @@ public class ContextConfig implements LifecycleListener {
         } else if (event.getType().equals(Lifecycle.CONFIGURE_STOP_EVENT)) {
             configureStop();
         } else if (event.getType().equals(Lifecycle.AFTER_INIT_EVENT)) {
-            init();// context初始化阶段,context属性配置
+            init(); // context 初始化阶段,context 属性配置
         } else if (event.getType().equals(Lifecycle.AFTER_DESTROY_EVENT)) {
             destroy();
         }
@@ -540,7 +540,7 @@ public class ContextConfig implements LifecycleListener {
     }
 
 
-    /** 创建(如果需要)并返回Digester,用于处理context配置描述符。
+    /** 创建(如果需要)并返回 Digester,用于处理 context 配置描述符
      * Create (if necessary) and return a Digester configured to process the
      * context configuration descriptor for an application.
      */
@@ -571,27 +571,27 @@ public class ContextConfig implements LifecycleListener {
     }
 
 
-    /** 处理默认context.xml配置文件(若存在), 其中web应用优先级 > Host配置 > Catalina容器配置// E:\Java\apache-tomcat-7.0.82-01\conf\context.xml
+    /** 处理默认 context.xml 配置文件(若存在), 其中 web应用优先级 > Host配置 > Catalina容器配置 // E:\Java\apache-tomcat-7.0.82-01\conf\context.xml
      * Process the default configuration file, if it exists.
      */
     protected void contextConfig(Digester digester) {
 
-        // Open the default context.xml file, if it exists.处理默认的conf/context.xml配置文件(若存在)
+        // Open the default context.xml file, if it exists.处理默认的 conf/context.xml 配置文件(若存在)
         if( defaultContextXml==null && context instanceof StandardContext ) {
             defaultContextXml = ((StandardContext)context).getDefaultContextXml();
         }
         // set the default if we don't have any overrides
         if( defaultContextXml==null ) getDefaultContextXml();
 
-        if (!context.getOverride()) {// 若Context的override属性为false(默认配置)
-            File defaultContextFile = new File(defaultContextXml);// 若存在conf/context.xml <Context><WatchedResource>WEB-INF/web.xml</WatchedResource></Context>
+        if (!context.getOverride()) { // 若 Context 的 override 属性为 false(默认配置)
+            File defaultContextFile = new File(defaultContextXml); // 若存在 conf/context.xml,这个配置文件中默认配置了: <Context><WatchedResource>WEB-INF/web.xml</WatchedResource></Context>
             if (!defaultContextFile.isAbsolute()) {
                 defaultContextFile =new File(getBaseDir(), defaultContextXml);// E:\Java\apache-tomcat-7.0.82-01\conf\context.xml
             }
             if (defaultContextFile.exists()) {
                 try {
                     URL defaultContextUrl = defaultContextFile.toURI().toURL();
-                    processContextConfig(digester, defaultContextUrl);// 使用digester处理context.xml
+                    processContextConfig(digester, defaultContextUrl);// 使用 digester 处理 context.xml
                 } catch (MalformedURLException e) {
                     log.error(sm.getString(
                             "contextConfig.badUrl", defaultContextFile), e);
@@ -599,7 +599,7 @@ public class ContextConfig implements LifecycleListener {
             }
 
             File hostContextFile = new File(getHostConfigBase(), Constants.HostContextXml);
-            if (hostContextFile.exists()) {// 若存在E:\Java\apache-tomcat-7.0.82-01\conf\Catalina\localhost\context.xml.default,则解析并更新context实例属性.默认不存在
+            if (hostContextFile.exists()) { // 若存在 ${hostConfigBase}\conf\Catalina\localhost\context.xml.default,则解析并更新 context 实例属性.默认不存在
                 try {
                     URL hostContextUrl = hostContextFile.toURI().toURL();
                     processContextConfig(digester, hostContextUrl);
@@ -609,7 +609,7 @@ public class ContextConfig implements LifecycleListener {
                 }
             }
         }
-        if (context.getConfigFile() != null)// 若context.configFile属性不为空,则解析该文件,更新当前context实例属性.默认不存在
+        if (context.getConfigFile() != null) // 若 context.configFile 属性不为空,则解析该文件,更新当前 context 实例属性.默认不存在
             processContextConfig(digester, context.getConfigFile());
 
     }
@@ -686,7 +686,7 @@ public class ContextConfig implements LifecycleListener {
      */
     protected void fixDocBase()
         throws IOException {
-        // 计算docBase的绝对路径
+        // 计算 docBase 的绝对路径
         Host host = (Host) context.getParent();
         String appBase = host.getAppBase();
 
@@ -832,12 +832,12 @@ public class ContextConfig implements LifecycleListener {
     }
 
 
-    /** 完成对应的 每个web应用项目的配置解析(web.xml),主要是解析context标签
+    /** 完成对应的 每个 web 应用项目的配置解析(web.xml),主要是解析 context 标签
      * Process a "init" event for this Context.
      */
     protected void init() {
         // Called from StandardContext.init().  StandardContext.init()会调用该方法
-        // 创建digester对象,指定context的解析规则.在HostConfig中仅根据<Context>节点属性创建了一个Context对象.但其实<Context>节点还有很多子节点需要解析并设置到Context对象中.
+        // 创建 digester 对象,指定 context 的解析规则.在 HostConfig 中仅根据 <Context> 节点属性创建了一个 Context 对象.但其实 <Context> 节点还有很多子节点需要解析并设置到 Context 对象中
         Digester contextDigester = createContextDigester();
         contextDigester.getParser();
 
@@ -845,21 +845,21 @@ public class ContextConfig implements LifecycleListener {
             log.debug(sm.getString("contextConfig.init"));
         context.setConfigured(false);
         ok = true;
-        // 解析config.xml配置
+        // 解析 config.xml 配置
         contextConfig(contextDigester);
-        // 创建用于解析web.xml的digester对象
+        // 创建用于解析 web.xml 的 digester 对象
         createWebXmlDigester(context.getXmlNamespaceAware(),
                 context.getXmlValidation());
     }
 
 
-    /** 在context启动前触发,用于更新Context的docBase属性 和 解决web目录锁的问题
+    /** 在 context 启动前触发,用于更新 Context 的 docBase 属性 和 解决web目录锁的问题
      * Process a "before start" event for this Context.
      */
     protected synchronized void beforeStart() {
 
         try {
-            fixDocBase();// docBase指向解压后的文件夹目录
+            fixDocBase(); // docBase 指向解压后的文件夹目录
         } catch (IOException e) {
             log.error(sm.getString(
                     "contextConfig.fixDocBase", context.getName()), e);
@@ -869,7 +869,7 @@ public class ContextConfig implements LifecycleListener {
     }
 
 
-    /** web应用初始化.解析web.xml文件,创建wrapper,Filter,ServletContextListener等. 在context启动子节点前触发
+    /** web 应用初始化.解析 web.xml 文件,创建 wrapper,Filter,ServletContextListener等.在 context 启动子节点前触发
      * Process a "contextConfig" event for this Context.
      */
     protected synchronized void configureStart() {
@@ -884,7 +884,7 @@ public class ContextConfig implements LifecycleListener {
                     Boolean.valueOf(context.getXmlValidation()),
                     Boolean.valueOf(context.getXmlNamespaceAware())));
         }
-        // 解析web.xml,创建Wrapper,使用addChild添加到Context中
+        // 解析 web.xml,创建 Wrapper,使用 addChild() 添加到 Context 中
         webConfig();
 
         if (!context.getIgnoreAnnotations()) {
@@ -1219,7 +1219,7 @@ public class ContextConfig implements LifecycleListener {
         }
     }
 
-    /**扫描web.xml.Servlet规范web.xml来源于WEB-INF/web.xml,web应用Jar包中META-INF/web-fragment.xml和META-INF/services/....适用于web应用程序并使用规范中定义的规则进行合并的xml文件. 有重复配置的xml文件,最具体的级别获胜.即应用程序的web.xml优先于主机级别或全局web.xml文件
+    /**扫描 web.xml.Servlet 规范 web.xml 来源于 WEB-INF/web.xml,web 应用 Jar 包中 META-INF/web-fragment.xml 和 META-INF/services/....适用于 web 应用程序并使用规范中定义的规则进行合并的 xml 文件. 有重复配置的 xml 文件,最具体的级别获胜.即应用程序的 web.xml 优先于主机级别或全局 web.xml 文件
      * Scan the web.xml files that apply to the web application and merge them
      * using the rules defined in the spec. For the global web.xml files,
      * where there is duplicate configuration, the most specific level wins. ie
@@ -1419,8 +1419,8 @@ public class ContextConfig implements LifecycleListener {
 
         DefaultWebXmlCacheEntry entry = hostWebXmlCache.get(host);
 
-        InputSource globalWebXml = getGlobalWebXmlSource();// 全局web.xml.如E:/Java/apache-tomcat-7.0.82-01/conf/web.xml
-        InputSource hostWebXml = getHostWebXmlSource();// 主机web.xml,默认为null
+        InputSource globalWebXml = getGlobalWebXmlSource(); // 全局 web.xml.如 E:/Java/apache-tomcat-7.0.82-01/conf/web.xml
+        InputSource hostWebXml = getHostWebXmlSource(); // 主机 web.xml,默认为 null
 
         long globalTimeStamp = 0;
         long hostTimeStamp = 0;

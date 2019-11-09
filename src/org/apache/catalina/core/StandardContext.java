@@ -5432,7 +5432,7 @@ public class StandardContext extends ContainerBase
             }
         }
 
-        if (getLoader() == null) {// 创建web应用类加载器
+        if (getLoader() == null) { // 创建 WebappLoader,每个web应用都使用各自的 WebappClassLoader
             WebappLoader webappLoader = new WebappLoader(getParentClassLoader());
             webappLoader.setDelegate(getDelegate());
             setLoader(webappLoader);

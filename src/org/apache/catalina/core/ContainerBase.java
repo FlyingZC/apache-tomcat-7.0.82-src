@@ -397,10 +397,10 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         readLock.lock();
         try {
             if (loader != null)
-                return loader;
+                return loader; // 先获取自身的 loader
 
             if (parent != null)
-                return parent.getLoader();
+                return parent.getLoader(); // 获取不到,再获取 parent 的 loader
 
             return null;
         } finally {
@@ -1229,14 +1229,14 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         // Start our child containers, if any.启动子容器,如果有的话.
         Container children[] = findChildren();
         List<Future<Void>> results = new ArrayList<Future<Void>>();
-        for (int i = 0; i < children.length; i++) {// 提交 启动子容器的任务.并阻塞当前线程等待执行结果
-            results.add(startStopExecutor.submit(new StartChild(children[i])));// 子容器使用startStopExecutor调用新线程来启动
+        for (int i = 0; i < children.length; i++) { // 提交 启动子容器的任务.并阻塞当前线程等待执行结果
+            results.add(startStopExecutor.submit(new StartChild(children[i]))); // 子容器使用 startStopExecutor 调用新线程来启动
         }
 
         boolean fail = false;
-        for (Future<Void> result : results) {// 启动 多个子容器的结果
+        for (Future<Void> result : results) { // 启动 多个子容器的执行结果
             try {
-                result.get();// 阻塞直到所有子容器启动完毕
+                result.get(); // 阻塞直到所有子容器启动完毕
             } catch (Exception e) {
                 log.error(sm.getString("containerBase.threadedStartFailed"), e);
                 fail = true;
@@ -1255,7 +1255,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         // 设置容器状态为STARTING,此时会触发START_EVENT生命周期事件.
         setState(LifecycleState.STARTING);
 
-        // Start our thread. 启动该层级的后台定时任务进程(不同容器调用,则启动不同容器的后台线程).用于处理如Cluster后台任务(包括部署变更检测,心跳).Realm后台任务处理.Pipeline中Value的后台任务处理(如果有定时处理任务)
+        // Start our thread. 启动该层级的后台定时任务进程(不同容器调用,则启动不同容器的后台线程).用于处理如 Cluster 后台任务(包括部署变更检测,心跳).Realm 后台任务处理.Pipeline 中 Value 的后台任务处理(如果有定时处理任务)
         threadStart();
 
     }
@@ -1646,7 +1646,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
                         if (parent.getLoader() != null) {
                             cl = parent.getLoader().getClassLoader();
                         }
-                        processChildren(parent, cl);// 调用容器 和 子容器的后台处理程序backgroundProcess方法
+                        processChildren(parent, cl); // 调用容器 和 子容器 的后台处理程序 backgroundProcess() 方法
                     }
                 }
             } catch (RuntimeException e) {
@@ -1661,14 +1661,14 @@ public abstract class ContainerBase extends LifecycleMBeanBase
                 }
             }
         }
-        /**调用容器 和 子容器的后台处理程序backgroundProcess方法*/
+        /** 调用容器 和 子容器 的后台处理程序 backgroundProcess() 方法 */
         protected void processChildren(Container container, ClassLoader cl) {
             try {
                 if (container.getLoader() != null) {
                     Thread.currentThread().setContextClassLoader
                         (container.getLoader().getClassLoader());
                 }
-                container.backgroundProcess();// 容器的backgroundProcess方法
+                container.backgroundProcess(); // 容器的 backgroundProcess() 方法
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 log.error("Exception invoking periodic operation: ", t);
@@ -1678,7 +1678,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             Container[] children = container.findChildren();
             for (int i = 0; i < children.length; i++) {
                 if (children[i].getBackgroundProcessorDelay() <= 0) {
-                    processChildren(children[i], cl);// 孩子的backgroundProcess()方法
+                    processChildren(children[i], cl); // 子容器的 backgroundProcess() 方法
                 }
             }
         }

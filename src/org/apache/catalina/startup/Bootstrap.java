@@ -53,7 +53,7 @@ public final class Bootstrap {
 
 
     /**
-     * Daemon object used by main.此处就是bootstrap的实例
+     * Daemon object used by main.此处就是 bootstrap 的实例
      */
     private static Bootstrap daemon = null;
 
@@ -74,16 +74,16 @@ public final class Bootstrap {
 
     // -------------------------------------------------------- Private Methods
 
-    /**初始化类加载器*/
+    /** 初始化类加载器 */
     private void initClassLoaders() {
         try {
-            commonLoader = createClassLoader("common", null);// 创建一个Common类加载器
+            commonLoader = createClassLoader("common", null); // 创建一个 Common 类加载器
             if( commonLoader == null ) {
                 // no config file, default to this loader - we might be in a 'single' env.
                 commonLoader=this.getClass().getClassLoader();
             }// 默认catalinaLoader和sharedLoader都使用父类加载器commonLoader
-            catalinaLoader = createClassLoader("server", commonLoader);// 再根据Common类加载器创建server类加载器
-            sharedLoader = createClassLoader("shared", commonLoader);// 再根据Common类加载器创建shared类加载器
+            catalinaLoader = createClassLoader("server", commonLoader); // 再根据 Common 类加载器创建 server 类加载器
+            sharedLoader = createClassLoader("shared", commonLoader); // 再根据 Common 类加载器创建 shared 类加载器
         } catch (Throwable t) {
             handleThrowable(t);
             log.error("Class loader creation threw exception", t);
@@ -91,12 +91,12 @@ public final class Bootstrap {
         }
     }
 
-    /**若配置了路径,则创建classLoader,否则返回父classLoader.可用于创建commonClassLoader,serverClassLoader,sharedClassLoader @param name 类加载器名*/
+    /** 若配置了路径,则创建 classLoader,否则返回父 classLoader.可用于创建 commonClassLoader,serverClassLoader,sharedClassLoader @param name 类加载器名 */
     private ClassLoader createClassLoader(String name, ClassLoader parent)
         throws Exception {
-        // 创建一个类加载器的步骤:1.把要加载的资源都添加到一个列表中;2.确定父类加载器,若使用默认的则传null;3.把这些参数传入ClassLoaderFactory工厂类去创建URLClassLoader实例
-        String value = CatalinaProperties.getProperty(name + ".loader");// value是需要加载的资源列表
-        if ((value == null) || (value.equals("")))// 如果没有配置server.loader或shared.loader等,则返回父类加载器,即此处为commonLoader
+        // 创建一个类加载器的步骤: 1.把要加载的资源都添加到一个列表中; 2.确定父类加载器,若使用默认的则传 null; 3.把这些参数传入 ClassLoaderFactory 工厂类去创建 URLClassLoader 实例
+        String value = CatalinaProperties.getProperty(name + ".loader"); // value 是需要加载的资源列表
+        if ((value == null) || (value.equals(""))) // 如果没有配置 server.loader 或 shared.loader 等,则返回父类加载器,即此处为 commonLoader
             return parent;
 
         value = replace(value);
@@ -105,7 +105,7 @@ public final class Bootstrap {
         // D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2/lib,D:\workspace-e3\.metadata\.plugins\org.eclipse.wst.server.core\tmp2/lib/*.jar,E:\Java\apache-tomcat-7.0.82-01/lib,E:\Java\apache-tomcat-7.0.82-01/lib/*.jar
         StringTokenizer tokenizer = new StringTokenizer(value, ",");
         while (tokenizer.hasMoreElements()) {
-            String repository = tokenizer.nextToken().trim();// 截取成一个个的资源列表
+            String repository = tokenizer.nextToken().trim(); // 截取成一个个的资源列表
             if (repository.length() == 0) {
                 continue;
             }
@@ -113,7 +113,7 @@ public final class Bootstrap {
             // Check for a JAR URL repository 先判断是不是网络资源
             try {
                 @SuppressWarnings("unused")
-                URL url = new URL(repository);// 若不确定要加载的资源是在网络上 还是在本地,使用URL加载.若是网络资源则不抛异常走到119行continue进行下一个操作.若是本地资源抛异常,接着走下面的代码
+                URL url = new URL(repository); // 若不确定要加载的资源是在网络上 还是在本地,尝试使用 URL 加载.若是网络资源则不抛异常走到119行 continue 进行下一个操作.若是本地资源抛异常,接着走下面的代码
                 repositories.add(
                         new Repository(repository, RepositoryType.URL));
                 continue;
@@ -122,16 +122,16 @@ public final class Bootstrap {
             }
 
             // Local repository 本地资源
-            if (repository.endsWith("*.jar")) {// 表示整个目录下所有的Jar包资源,仅仅是.jar后缀的资源(*.jar即所有jar)
+            if (repository.endsWith("*.jar")) { // 表示整个目录下所有的 Jar 包资源,仅仅是 .jar 后缀的资源(*.jar 即所有 jar)
                 repository = repository.substring
                     (0, repository.length() - "*.jar".length());
                 repositories.add(
                         new Repository(repository, RepositoryType.GLOB));
-            } else if (repository.endsWith(".jar")) {// 单个jar
+            } else if (repository.endsWith(".jar")) { // 单个jar
                 repositories.add(
                         new Repository(repository, RepositoryType.JAR));
             } else {
-                repositories.add(// dir.表示整个目录下的资源,包括所有Class,Jar包以及其他类型资源
+                repositories.add( // dir.表示整个目录下的资源,包括所有 Class,Jar包 以及 其他类型资源
                         new Repository(repository, RepositoryType.DIR));
             }
         }
@@ -185,7 +185,7 @@ public final class Bootstrap {
     }
 
 
-    /** 1.创建StandardClassLoader类加载器,并设置为main线程的线程上下文类加载器;2.通过StandardClassLoader加载类Cataline并创建Catalina对象 ,并保存到Boosstrap对象.
+    /** 1.创建 catalinaLoader 类加载器,并设置为 main 线程的线程上下文类加载器; 2.通过 catalinaLoader 加载类 Catalina 并创建 Catalina 对象,并保存到 Boosstrap 对象
      * Initialize daemon.
      */
     public void init()
@@ -195,14 +195,14 @@ public final class Bootstrap {
         // Set Catalina path
         setCatalinaHome();
         setCatalinaBase();
-        // 实例化**ClassLoaders，创建URLClassLoader    
+        // 实例化 **ClassLoaders,创建 URLClassLoader
         initClassLoaders();
-
+        // 设置当前线程的上下文类加载器为 catalinaLoader
         Thread.currentThread().setContextClassLoader(catalinaLoader);
 
         SecurityClassLoad.securityClassLoad(catalinaLoader);
 
-        // Load our startup class and call its process() method, 使用catalinaLoader加载Catalina类
+        // Load our startup class and call its process() method, 使用 catalinaLoader 加载 Catalina 类
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
         Class<?> startupClass =
@@ -210,7 +210,7 @@ public final class Bootstrap {
             ("org.apache.catalina.startup.Catalina");
         Object startupInstance = startupClass.newInstance();
 
-        // Set the shared extensions class loader, 调用catalina.setParentClassLoader方法.将java.lang.ClassLoader设为
+        // Set the shared extensions class loader, 调用 catalina.setParentClassLoader() 方法.将 ParentClassLoader 设为 sharedLoader
         if (log.isDebugEnabled())
             log.debug("Setting startup class properties");
         String methodName = "setParentClassLoader";
@@ -228,7 +228,7 @@ public final class Bootstrap {
 
 
     /**
-     * Load daemon.调用load方法
+     * Load daemon.调用 load 方法
      */
     private void load(String[] arguments)
         throws Exception {
@@ -393,9 +393,9 @@ public final class Bootstrap {
 
         if (daemon == null) {
             // Don't set daemon until init() has completed
-            Bootstrap bootstrap = new Bootstrap();// 实例化Bootstrap的一个实例  
+            Bootstrap bootstrap = new Bootstrap(); // 实例化 Bootstrap 的一个实例
             try {
-                bootstrap.init();//set一些系统属性、初始化classLoader和Catalina.setParentClassLoader()
+                bootstrap.init(); // 设置 Catalina path, 初始化 classLoader 和 Catalina.setParentClassLoader()
             } catch (Throwable t) {
                 handleThrowable(t);
                 t.printStackTrace();
@@ -422,10 +422,10 @@ public final class Bootstrap {
             } else if (command.equals("stopd")) {
                 args[args.length - 1] = "stop";
                 daemon.stop();
-            } else if (command.equals("start")) {// 处理start命令
+            } else if (command.equals("start")) { // 处理 start 命令
                 daemon.setAwait(true);
-                daemon.load(args);// 加载配置资源，通过反射调用catalina.load方法，利用catalina.load方法创建digester实例，从而解析conf/server.xml文件
-                daemon.start();// 运行各个组件，容器开始启动
+                daemon.load(args); // 加载配置资源,通过反射调用 catalina.load() 方法,创建 digester 实例,解析 conf/server.xml 文件
+                daemon.start(); // 运行各个组件,容器开始启动
             } else if (command.equals("stop")) {
                 daemon.stopServer(args);
             } else if (command.equals("configtest")) {

@@ -437,7 +437,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
                 if ( selector != null ) pool.put(selector);
             }
         } else {// 非阻塞读数据,有多少则读取多少数据
-            nRead = socket.read(socket.getBufHandler().getReadBuffer());
+            nRead = socket.read(socket.getBufHandler().getReadBuffer());// socketChannel.read(byteBuffer) 从 channel读到 buffer中
         }
         if (nRead > 0) {// 若有数据读取出来
             socket.getBufHandler().getReadBuffer().flip();// 调用ByteBuffer.flip()将buffer切换到读模式
@@ -828,7 +828,7 @@ public class InternalNioInputBuffer extends AbstractInputBuffer<NioChannel> {
             throws IOException {
 
             if (pos >= lastValid) {// 若字节数组没有数据可以读取了,调用fill从socket里读取数据,并保存到当前对象的字节数组
-                if (!fill(true,true)) //此处阻塞读.read body, must be blocking, as the thread is inside the app
+                if (!fill(true,true)) //此处阻塞读.必须阻塞读，因为线程在应用程序内部.read body, must be blocking, as the thread is inside the app
                     return -1;
             }
 

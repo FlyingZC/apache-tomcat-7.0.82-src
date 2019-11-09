@@ -326,7 +326,7 @@ public final class Mapper {
             newContextVersion.mapperDirectoryRedirectEnabled = mapperDirectoryRedirectEnabled;
             
             if (wrappers != null) {
-                addWrappers(newContextVersion, wrappers);
+                addWrappers(newContextVersion, wrappers);// 向 Mapper中添加 Wrapper
             }
 
             ContextList contextList = mappedHost.contextList;

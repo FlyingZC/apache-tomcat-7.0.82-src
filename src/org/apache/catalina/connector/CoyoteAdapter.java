@@ -755,7 +755,7 @@ public class CoyoteAdapter implements Adapter {
         boolean mapRequired = true;
 
         while (mapRequired) {
-            // This will map the the latest version by default.匹配请求对应的Host,Context,Wrapper
+            // This will map the the latest version by default.从 Mapper中匹配出请求对应的 Host,Context,Wrapper
             connector.getMapper().map(serverName, decodedURI, version,
                                       request.getMappingData());
             request.setContext((Context) request.getMappingData().context);

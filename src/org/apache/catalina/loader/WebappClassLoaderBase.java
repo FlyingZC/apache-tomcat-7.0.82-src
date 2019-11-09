@@ -1780,7 +1780,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 }
             }
 
-            // (0) Check our previously loaded local class cache
+            // (0) Check our previously loaded local class cache. 1.检查 WebappClassLoader 缓存中是否加载过此类
             clazz = findLoadedClass0(name);
             if (clazz != null) {
                 if (log.isDebugEnabled())
@@ -1790,7 +1790,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 return (clazz);
             }
 
-            // (0.1) Check our previously loaded class cache
+            // (0.1) Check our previously loaded class cache 2.检查 JVM 虚拟机中是否加载过该类.调用 java.lang.ClassLoader 中的 native 方法
             clazz = findLoadedClass(name);
             if (clazz != null) {
                 if (log.isDebugEnabled())
@@ -1803,7 +1803,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             // (0.2) Try loading the class with the system class loader, to prevent
             //       the webapp from overriding J2SE classes
             try {
-                clazz = j2seClassLoader.loadClass(name);
+                clazz = j2seClassLoader.loadClass(name); // 3.使用 bootstrapClassLoader 加载该类,防止覆盖 J2SE 类库
                 if (clazz != null) {
                     if (resolve)
                         resolveClass(clazz);
@@ -1836,7 +1836,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
 
             boolean delegateLoad = delegate || filter(name);
 
-            // (1) Delegate to our parent if requested
+            // (1) Delegate to our parent if requested. 4.若 delegate 设置为 true,则会完全按照 JVM 的双亲委托机制流程加载类
             if (delegateLoad) {
                 if (log.isDebugEnabled())
                     log.debug("  Delegating to parent classloader1 " + parent);
@@ -1858,7 +1858,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             if (log.isDebugEnabled())
                 log.debug("  Searching local repositories");
             try {
-                clazz = findClass(name);
+                clazz = findClass(name); // 5. 使用 WebappClassLoader 加载类
                 if (clazz != null) {
                     if (log.isDebugEnabled())
                         log.debug("  Loading class from local repository");
@@ -1870,7 +1870,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 // Ignore
             }
 
-            // (3) Delegate to parent unconditionally
+            // (3) Delegate to parent unconditionally 6.若还是没找到,则委托给父类加载器加载
             if (!delegateLoad) {
                 if (log.isDebugEnabled())
                     log.debug("  Delegating to parent classloader at end: " + parent);
@@ -3137,7 +3137,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 new PrivilegedFindResourceByName(name, path, true);
             entry = AccessController.doPrivileged(dp);
         } else {
-            entry = findResourceInternal(name, path, true);
+            entry = findResourceInternal(name, path, true); // 1.通过名称去当前 webappClassLoader 的仓库中查找对应的类文件
         }
 
         if (entry == null)
@@ -3204,7 +3204,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             try {
                 clazz = defineClass(name, entry.binaryContent, 0,
                         entry.binaryContent.length,
-                        new CodeSource(entry.codeBase, entry.certificates));
+                        new CodeSource(entry.codeBase, entry.certificates)); // 2.将找到的类文件通过 defineClass() 转变为 Jvm 可以识别的 Class 对象返回
             } catch (UnsupportedClassVersionError ucve) {
                 throw new UnsupportedClassVersionError(
                         ucve.getLocalizedMessage() + " " +
@@ -3681,7 +3681,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
      */
     protected Class<?> findLoadedClass0(String name) {
         String path = binaryNameToPath(name, true);
-        ResourceEntry entry = resourceEntries.get(path);
+        ResourceEntry entry = resourceEntries.get(path); // WebappClassLoader 加载过的类都存放在 resourceEntries 缓存中
         if (entry != null) {
             return entry.loadedClass;
         }
