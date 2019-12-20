@@ -501,7 +501,7 @@ public class Request
         notes.clear();
         cookies = null;
 
-        recycleSessionInfo();
+        recycleSessionInfo(); // 回收 session
 
         if (Globals.IS_SECURITY_ENABLED || Connector.RECYCLE_FACADES) {
             parameterMap = new ParameterMap<String, String[]>();
@@ -3113,23 +3113,23 @@ public class Request
         }
         session = manager.createSession(sessionId);
 
-        // Creating a new session cookie based on that session
+        // Creating a new session cookie based on that session.基于刚刚创建的session创建一个新的cookie
         if ((session != null) && (getContext() != null)
                && getContext().getServletContext().
                        getEffectiveSessionTrackingModes().contains(
                                SessionTrackingMode.COOKIE)) {
             Cookie cookie =
                 ApplicationSessionCookieConfig.createSessionCookie(
-                        context, session.getIdInternal(), isSecure());
+                        context, session.getIdInternal(), isSecure()); // 创建 session cookie
 
-            response.addSessionCookieInternal(cookie);
+            response.addSessionCookieInternal(cookie); // 将 cookie 添加到 响应头
         }
 
         if (session == null) {
             return null;
         }
 
-        session.access();
+        session.access(); // 更新 thisAccessedTime
         return session;
     }
 

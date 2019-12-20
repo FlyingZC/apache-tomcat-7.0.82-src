@@ -192,7 +192,7 @@ public class StandardManager extends ManagerBase {
             log.debug("Start: Loading persisted sessions");
         }
 
-        // Initialize our internal data structures
+        // Initialize our internal data structures 清空 sessions map
         sessions.clear();
 
         // Open an input stream to the specified pathname, if any

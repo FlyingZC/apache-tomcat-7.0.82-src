@@ -141,7 +141,7 @@ public class StandardSession implements HttpSession, Session, Serializable {
     protected static final String EMPTY_ARRAY[] = new String[0];
 
 
-    /**
+    /** 保存 session 里的 key-value
      * The collection of user data attributes associated with this Session.
      */
     protected ConcurrentMap<String, Object> attributes = new ConcurrentHashMap<String, Object>();
@@ -645,7 +645,7 @@ public class StandardSession implements HttpSession, Session, Serializable {
                 timeIdle = (int) ((timeNow - thisAccessedTime) / 1000L);
             }
             if (timeIdle >= maxInactiveInterval) {
-                expire(true);
+                expire(true); // 处理 session 失效
             }
         }
 
@@ -784,17 +784,17 @@ public class StandardSession implements HttpSession, Session, Serializable {
                 }
             }
             try {
-                Object listeners[] = context.getApplicationLifecycleListeners();
+                Object listeners[] = context.getApplicationLifecycleListeners(); // 获取 listeners
                 if (notify && (listeners != null)) {
                     HttpSessionEvent event =
-                        new HttpSessionEvent(getSession());
+                        new HttpSessionEvent(getSession()); // 通过 session 创建 HttpSessionEvent
                     for (int i = 0; i < listeners.length; i++) {
                         int j = (listeners.length - 1) - i;
                         if (!(listeners[j] instanceof HttpSessionListener))
                             continue;
                         HttpSessionListener listener =
                             (HttpSessionListener) listeners[j];
-                        try {
+                        try { // 触发 HttpSessionListener 的相关事件
                             context.fireContainerEvent("beforeSessionDestroyed",
                                     listener);
                             listener.sessionDestroyed(event);
@@ -830,7 +830,7 @@ public class StandardSession implements HttpSession, Session, Serializable {
             }
 
             // Remove this session from our manager's active sessions
-            manager.remove(this, true);
+            manager.remove(this, true); // 从 manager 中 移除 session
 
             // Notify interested session event listeners
             if (notify) {
@@ -849,7 +849,7 @@ public class StandardSession implements HttpSession, Session, Serializable {
                 }
             }
 
-            // We have completed expire of this session
+            // We have completed expire of this session 设置失效标识
             setValid(false);
             expiring = false;
 
@@ -1471,7 +1471,7 @@ public class StandardSession implements HttpSession, Session, Serializable {
             }
         }
 
-        // Replace or add this attribute
+        // Replace or add this attribute.设置 key value
         Object unbound = attributes.put(name, value);
 
         // Call the valueUnbound() method if necessary

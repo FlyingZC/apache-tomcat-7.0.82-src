@@ -186,7 +186,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
 
     private final Object maxActiveUpdateLock = new Object();
 
-    /**
+    /** 最大 active sessions 数量
      * The maximum number of active Sessions allowed, or -1 for no limit.
      */
     protected int maxActiveSessions = -1;
@@ -210,7 +210,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
     private int count = 0;
 
 
-    /**
+    /** session失效的频率
      * Frequency of the session expiration, and related manager operations.
      * Manager operations will be done once for the specified amount of
      * backgroundProcess calls (ie, the lower the amount, the most often the
@@ -641,7 +641,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
      */
     @Override
     public void backgroundProcess() {
-        count = (count + 1) % processExpiresFrequency;
+        count = (count + 1) % processExpiresFrequency; // backgroundProcess默认每10s被调用一次.这里通过每次count + 1 然后 和 6 取模,控制每6次(相当于60s)才会执行一次
         if (count == 0)
             processExpires();
     }
@@ -652,20 +652,20 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
     public void processExpires() {
 
         long timeNow = System.currentTimeMillis();
-        Session sessions[] = findSessions();
+        Session sessions[] = findSessions(); // 获取所有 sessions
         int expireHere = 0 ;
         
         if(log.isDebugEnabled())
             log.debug("Start expire sessions " + getName() + " at " + timeNow + " sessioncount " + sessions.length);
         for (int i = 0; i < sessions.length; i++) {
-            if (sessions[i]!=null && !sessions[i].isValid()) {
+            if (sessions[i]!=null && !sessions[i].isValid()) { // session失效,isValid()会判断并处理session失效
                 expireHere++;
             }
         }
         long timeEnd = System.currentTimeMillis();
         if(log.isDebugEnabled())
              log.debug("End expire sessions " + getName() + " processingTime " + (timeEnd - timeNow) + " expired sessions: " + expireHere);
-        processingTime += ( timeEnd - timeNow );
+        processingTime += ( timeEnd - timeNow ); // 处理耗时
 
     }
 
@@ -769,7 +769,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         session.setNew(true);
         session.setValid(true);
         session.setCreationTime(System.currentTimeMillis());
-        session.setMaxInactiveInterval(((Context) getContainer()).getSessionTimeout() * 60);
+        session.setMaxInactiveInterval(((Context) getContainer()).getSessionTimeout() * 60); // 设置session超时时间
         String id = sessionId;
         if (id == null) {
             id = generateSessionId();
@@ -832,7 +832,7 @@ public abstract class ManagerBase extends LifecycleMBeanBase implements Manager 
         }
 
         if (session.getIdInternal() != null) {
-            sessions.remove(session.getIdInternal());
+            sessions.remove(session.getIdInternal()); // 从map中移除session
         }
     }
 

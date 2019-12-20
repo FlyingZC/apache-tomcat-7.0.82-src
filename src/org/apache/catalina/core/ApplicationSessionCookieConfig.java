@@ -151,7 +151,7 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
         this.secure = secure;
     }
 
-    /**
+    /** 根据sessionId创建 sessino cookie
      * Creates a new session cookie for the given session ID
      *
      * @param context     The Context for the web application
@@ -171,7 +171,7 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
         //       3. Defaults
 
         Cookie cookie = new Cookie(
-                SessionConfig.getSessionCookieName(context), sessionId);
+                SessionConfig.getSessionCookieName(context), sessionId); // cookieName是JSESSIONID
        
         // Just apply the defaults.
         cookie.setMaxAge(scc.getMaxAge());

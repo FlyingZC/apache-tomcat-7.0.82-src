@@ -47,7 +47,7 @@ public abstract class LifecycleBase implements Lifecycle {
     private LifecycleSupport lifecycle = new LifecycleSupport(this);
 
 
-    /**
+    /** volatile 修饰 state
      * The current state of the source component.
      */
     private volatile LifecycleState state = LifecycleState.NEW;
@@ -349,7 +349,7 @@ public abstract class LifecycleBase implements Lifecycle {
     }
     /**更新组件状态,检查设置的状态是否符合逻辑,最后发布相应事件*/
     private synchronized void setStateInternal(LifecycleState state,
-            Object data, boolean check) throws LifecycleException {
+            Object data, boolean check) throws LifecycleException { // 变更状态时加 synchronized 锁
 
         if (log.isDebugEnabled()) {
             log.debug(sm.getString("lifecycleBase.setState", this, state));

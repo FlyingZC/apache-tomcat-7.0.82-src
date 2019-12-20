@@ -5637,7 +5637,7 @@ public class StandardContext extends ContainerBase
             }
 
             try {
-                // Start manager
+                // Start manager.用于管理session.默认实现为 StandardManager
                 Manager manager = getManagerInternal();
                 if ((manager != null) && (manager instanceof Lifecycle)) {
                     ((Lifecycle) getManager()).start();

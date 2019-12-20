@@ -41,3 +41,21 @@ modules/jdbc-pool/bin
 modules/jdbc-pool/includes
 webapps/docs/jdbc-pool.xml
 /bin/
+
+# Build Artifacts
+
+.gradle/
+build/
+target/
+bin/
+dependency-reduced-pom.xml
+
+# Eclipse Project Files
+
+.settings/
+
+# IntelliJ IDEA Files
+
+*.ipr
+*.iws
+*.idea/*

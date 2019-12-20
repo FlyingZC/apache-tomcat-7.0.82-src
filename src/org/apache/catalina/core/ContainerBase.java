@@ -1475,7 +1475,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         Manager manager = getManagerInternal();
         if (manager != null) {
             try {
-                manager.backgroundProcess();
+                manager.backgroundProcess(); // 用于清理过期session
             } catch (Exception e) {
                 log.warn(sm.getString("containerBase.backgroundProcess.manager", manager), e);
             }

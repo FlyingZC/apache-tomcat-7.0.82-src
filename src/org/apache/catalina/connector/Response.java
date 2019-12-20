@@ -1015,7 +1015,7 @@ public class Response implements HttpServletResponse {
         String name = cookie.getName();
         final String headername = "Set-Cookie";
         final String startsWith = name + "=";
-        final StringBuffer sb = generateCookieString(cookie);
+        final StringBuffer sb = generateCookieString(cookie); // 形如: JSESSIONID=AA97BC74DD24D2423386C81DB98CED8B; Path=/books; HttpOnly
         boolean set = false;
         MimeHeaders headers = getCoyoteResponse().getMimeHeaders();
         int n = headers.size();
@@ -1028,7 +1028,7 @@ public class Response implements HttpServletResponse {
             }
         }
         if (!set) {
-            addHeader(headername, sb.toString());
+            addHeader(headername, sb.toString()); // 添加响应头 Set-Cookie
         }
 
 

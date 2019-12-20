@@ -513,7 +513,7 @@ public class CoyoteAdapter implements Adapter {
 
             // Recycle the wrapper request and response
             if (!comet && !async) {
-                request.recycle();
+                request.recycle(); // 回收 request
                 response.recycle();
             } else {
                 // Clear converters so that the minimum amount of memory
