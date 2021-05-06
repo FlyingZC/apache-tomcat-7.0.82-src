@@ -940,7 +940,7 @@ public class Connector extends LifecycleMBeanBase  {
     }
 
 
-    /**重启连接器
+    /** 重启连接器
      * resume the connector.
      */
     public void resume() {

@@ -298,23 +298,23 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
      * @param parent Our parent class loader
      */
     public WebappClassLoaderBase(ClassLoader parent) {
-
+        // 通过传入 parent 创建 WebappClassLoader
         super(new URL[0], parent);
 
         ClassLoader p = getParent();
         if (p == null) {
             p = getSystemClassLoader();
         }
-        this.parent = p;
+        this.parent = p; // 保存parent引用
 
         ClassLoader j = String.class.getClassLoader();
         if (j == null) {
-            j = getSystemClassLoader();
+            j = getSystemClassLoader(); // 获取 appClassLoader
             while (j.getParent() != null) {
                 j = j.getParent();
             }
         }
-        this.j2seClassLoader = j;
+        this.j2seClassLoader = j; // 保存 ExtClassLoader
 
         securityManager = System.getSecurityManager();
         if (securityManager != null) {
@@ -344,7 +344,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             new ConcurrentHashMap<String, ResourceEntry>();
 
 
-    /**
+    /** 缓存没找到的资源列表.后续就不用重复查找了
      * The list of not found resources.
      */
     protected HashMap<String, String> notFoundResources =
@@ -376,7 +376,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
     protected long lastJarAccessed = 0L;
 
 
-    /**
+    /** 比如 /WEB-INF/classes 目录
      * The list of local repositories, in the order they should be searched
      * for locally loaded classes or resources.
      */
@@ -479,7 +479,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
     protected ClassLoader system = null;
 
 
-    /**
+    /** 保存 ExtClassLoader
      * The bootstrap class loader used to load the JavaSE classes. In some
      * implementations this class loader is always <code>null</null> and in
      * those cases {@link ClassLoader#getParent()} will be called recursively on
@@ -1803,7 +1803,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             // (0.2) Try loading the class with the system class loader, to prevent
             //       the webapp from overriding J2SE classes
             try {
-                clazz = j2seClassLoader.loadClass(name); // 3.使用 bootstrapClassLoader 加载该类,防止覆盖 J2SE 类库
+                clazz = j2seClassLoader.loadClass(name); // 3.使用 ExtClassLoader 加载该类(当然它也会委托它的父类加载器 BootstrapClassLoader),防止覆盖 J2SE 类库
                 if (clazz != null) {
                     if (resolve)
                         resolveClass(clazz);
@@ -3159,12 +3159,12 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             String packageName = null;
             int pos = name.lastIndexOf('.');
             if (pos != -1)
-                packageName = name.substring(0, pos);
+                packageName = name.substring(0, pos); // 截取出包名
 
             Package pkg = null;
 
             if (packageName != null) {
-                pkg = getPackage(packageName);
+                pkg = getPackage(packageName); // 获取包名对应的 包对象
                 // Define the package (if null)
                 if (pkg == null) {
                     try {
@@ -3182,7 +3182,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 }
             }
 
-            if (securityManager != null) {
+            if (securityManager != null) { // 包检查
 
                 // Checking sealing
                 if (pkg != null) {
@@ -3249,7 +3249,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
     }
 
 
-    /**
+    /** 在 /WEB-INF/classes 和 /WEB-INF/lib/*.jar 中 查找 .class
      * Find specified resource in local repositories.
      *
      * @return the loaded resource, or null if the resource isn't found
@@ -3268,9 +3268,9 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
         JarEntry jarEntry = null;
         // Need to skip the leading / to find resoucres in JARs
         String jarEntryPath = path.substring(1);
-
+        // 1.先查缓存
         ResourceEntry entry = resourceEntries.get(path);
-        if (entry != null) {
+        if (entry != null) { // 缓存中有
             if (manifestRequired && entry.manifest == MANIFEST_UNKNOWN) {
                 // This resource was added to the cache when a request was made
                 // for the resource that did not need the manifest. Now the
@@ -3295,15 +3295,15 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             }
             return entry;
         }
-
+        // 资源二进制数据长度
         int contentLength = -1;
-        InputStream binaryStream = null;
-        boolean isClassResource = path.endsWith(CLASS_FILE_SUFFIX);
+        InputStream binaryStream = null; // 资源二进制输入流
+        boolean isClassResource = path.endsWith(CLASS_FILE_SUFFIX); // 是否是 .class文件
         boolean isCacheable = isClassResource;
         if (!isCacheable) {
              isCacheable = path.startsWith(SERVICES_PREFIX);
         }
-
+        // Jar包数量
         int jarFilesLength = jarFiles.length;
         int repositoriesLength = repositories.length;
 
@@ -3312,13 +3312,13 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
         Resource resource = null;
 
         boolean fileNeedConvert = false;
-
+        // 2.遍历 repositories.比如 /WEB-INF/classes
         for (i = 0; (entry == null) && (i < repositoriesLength); i++) {
             try {
-
+                // 形如: /WEB-INF/classes//org/springframework/web/WebApplicationInitializer.class
                 String fullPath = repositories[i] + path;
 
-                Object lookupResult = resources.lookup(fullPath);
+                Object lookupResult = resources.lookup(fullPath); // 通过JNDI查找
                 if (lookupResult instanceof Resource) {
                     resource = (Resource) lookupResult;
                 }
@@ -3347,7 +3347,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
 
 
                     try {
-                        binaryStream = resource.streamContent();
+                        binaryStream = resource.streamContent(); // 资源找到,将二进制输入流赋给 binaryStream
                     } catch (IOException e) {
                         return null;
                     }
@@ -3387,10 +3387,10 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 // Ignore
             }
         }
-
+        // 上面没查到,并且notFoundResources里面也记录了没查到,就不继续往下查找了
         if ((entry == null) && (notFoundResources.containsKey(name)))
             return null;
-
+        // 3.遍历Jar包
         synchronized (jarFiles) {
 
             try {
@@ -3398,16 +3398,16 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                     return null;
                 }
                 for (i = 0; (entry == null) && (i < jarFilesLength); i++) {
-
+                    // 找到包含该类的Jar文件
                     jarEntry = jarFiles[i].getJarEntry(jarEntryPath);
 
                     if (jarEntry != null) {
 
                         entry = new ResourceEntry();
                         try {
-                            entry.codeBase = getURI(jarRealFiles[i]);
+                            entry.codeBase = getURI(jarRealFiles[i]); // Jar包路径
                             entry.source =
-                                    UriUtil.buildJarUrl(entry.codeBase.toString(), jarEntryPath);
+                                    UriUtil.buildJarUrl(entry.codeBase.toString(), jarEntryPath); // 形如: jar:file:/Users/duandian/Documents/0zc/02-my/01-soft/apache-tomcat-7.0.82/webapps/books/WEB-INF/lib/spring-web-4.2.0.RELEASE.jar!/org/springframework/web/WebApplicationInitializer.class
                             entry.lastModified = jarRealFiles[i].lastModified();
                         } catch (MalformedURLException e) {
                             return null;
@@ -3419,12 +3419,12 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                             } else {
                                 entry.manifest = MANIFEST_UNKNOWN;
                             }
-                            binaryStream = jarFiles[i].getInputStream(jarEntry);
+                            binaryStream = jarFiles[i].getInputStream(jarEntry); // 读取Jar文件的二进制流
                         } catch (IOException e) {
                             return null;
                         }
 
-                        // Extract resources contained in JAR to the workdir
+                        // Extract resources contained in JAR to the workdir. 将Jar包解压到 workdir
                         if (antiJARLocking && !(path.endsWith(CLASS_FILE_SUFFIX))) {
                             byte[] buf = new byte[1024];
                             File resourceFile = new File(loaderDir, jarEntry.getName());
@@ -3489,7 +3489,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                     }
                 }
 
-                if (entry == null) {
+                if (entry == null) { // 还是没查到,放入 notFoundResources 缓存
                     synchronized (notFoundResources) {
                         notFoundResources.put(name, name);
                     }
@@ -3588,12 +3588,12 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             // instance
             ResourceEntry entry2 = resourceEntries.get(path);
             if (entry2 == null) {
-                resourceEntries.put(path, entry);
+                resourceEntries.put(path, entry); // 缓存查找到的 ResourceEntry
             } else {
                 entry = entry2;
             }
         }
-
+        // 返回 ResourceEntry
         return entry;
 
     }
@@ -3724,7 +3724,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
         String packageName = null;
         int pos = name.lastIndexOf('.');
         if (pos != -1)
-            packageName = name.substring(0, pos);
+            packageName = name.substring(0, pos); // 截取出包名
         else
             return false;
 
@@ -3738,7 +3738,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
     }
 
 
-    /**
+    /** 校验类名
      * Validate a classname. As per SRV.9.7.2, we must restrict loading of
      * classes from J2SE (java.*) and most classes of the servlet API
      * (javax.servlet.*). That should enhance robustness and prevent a number

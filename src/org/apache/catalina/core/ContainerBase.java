@@ -430,7 +430,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
      */
     @Override
     public void setLoader(Loader loader) {
-        Lock writeLock = loaderLock.writeLock();
+        Lock writeLock = loaderLock.writeLock(); // 上写锁
         writeLock.lock();
         Loader oldLoader = null;
         try {

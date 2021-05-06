@@ -753,7 +753,7 @@ public abstract class AbstractEndpoint<S> {
         acceptors = new Acceptor[count];
 
         for (int i = 0; i < count; i++) {
-            acceptors[i] = createAcceptor();// 创建并启动acceptor线程
+            acceptors[i] = createAcceptor();// 创建并启动acceptor线程,Acceptor实现Runnable接口
             String threadName = getName() + "-Acceptor-" + i;
             acceptors[i].setThreadName(threadName);
             Thread t = new Thread(acceptors[i], threadName);

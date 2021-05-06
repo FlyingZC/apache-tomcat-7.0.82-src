@@ -92,8 +92,8 @@ public class ThreadLocalLeakPreventionListener implements LifecycleListener,
             }
 
             if (Lifecycle.AFTER_STOP_EVENT.equals(event.getType()) &&
-                    lifecycle instanceof Context) {
-                stopIdleThreads((Context) lifecycle);
+                    lifecycle instanceof Context) { // 停止后事件
+                stopIdleThreads((Context) lifecycle); // 销毁线程池内的空闲线程
             }
         } catch (Exception e) {
             String msg =
@@ -209,7 +209,7 @@ public class ThreadLocalLeakPreventionListener implements LifecycleListener,
                 ProtocolHandler handler = connector.getProtocolHandler();
                 Executor executor = null;
                 if (handler != null) {
-                    executor = handler.getExecutor();
+                    executor = handler.getExecutor(); // 获取 executor
                 }
 
                 if (executor instanceof ThreadPoolExecutor) {

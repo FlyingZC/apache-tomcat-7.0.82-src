@@ -548,7 +548,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
             // Start poller threads. 创建并启动poller线程(轮询器),启动后会执行poller里的run()
             pollers = new Poller[getPollerThreadCount()];
             for (int i=0; i<pollers.length; i++) {
-                pollers[i] = new Poller();
+                pollers[i] = new Poller(); // Poller 实现了 Runnable 接口
                 Thread pollerThread = new Thread(pollers[i], getName() + "-ClientPoller-"+i);
                 pollerThread.setPriority(threadPriority);
                 pollerThread.setDaemon(true);

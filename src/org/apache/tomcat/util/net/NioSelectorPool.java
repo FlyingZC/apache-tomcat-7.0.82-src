@@ -48,7 +48,7 @@ public class NioSelectorPool {
         Boolean.parseBoolean(System.getProperty("org.apache.tomcat.util.net.NioSelectorShared", "true"));
 
     protected NioBlockingSelector blockingSelector;
-
+    // 线程共享的 selector
     protected volatile Selector SHARED_SELECTOR;
 
     protected int maxSelectors = 200;

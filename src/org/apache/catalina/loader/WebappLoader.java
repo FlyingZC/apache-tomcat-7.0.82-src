@@ -119,7 +119,7 @@ public class WebappLoader extends LifecycleMBeanBase
     private static boolean first = true;
 
 
-    /**
+    /** 具体的类加载器.如 ParallelWebappClassLoader 或 WebappClassLoader.
      * The class loader being managed by this Loader component.
      */
     private WebappClassLoaderBase classLoader = null;
@@ -154,7 +154,7 @@ public class WebappLoader extends LifecycleMBeanBase
         "org.apache.catalina.loader.WebappClassLoader";
 
 
-    /**
+    /** 父类加载器
      * The parent class loader of the class loader we will create.
      */
     private ClassLoader parentClassLoader = null;
@@ -420,9 +420,9 @@ public class WebappLoader extends LifecycleMBeanBase
         if (reloadable && modified()) {
             try {
                 Thread.currentThread().setContextClassLoader
-                    (WebappLoader.class.getClassLoader());
+                    (WebappLoader.class.getClassLoader()); // 变更线程上下文类加载器为 webapp 类加载器
                 if (container instanceof StandardContext) {
-                    ((StandardContext) container).reload();
+                    ((StandardContext) container).reload(); // 重载 webapp
                 }
             } finally {
                 if (container.getLoader() != null) {
@@ -578,7 +578,7 @@ public class WebappLoader extends LifecycleMBeanBase
 
         // Construct a class loader based on our current repositories list
         try {
-
+            // 创建 classLoader
             classLoader = createClassLoader();
             classLoader.setResources(container.getResources());
             classLoader.setDelegate(this.delegate);
@@ -719,7 +719,7 @@ public class WebappLoader extends LifecycleMBeanBase
      */
     private WebappClassLoaderBase createClassLoader()
         throws Exception {
-
+        // 创建 WebappClassLoader
         Class<?> clazz = Class.forName(loaderClass);
         WebappClassLoaderBase classLoader = null;
 
@@ -729,7 +729,7 @@ public class WebappLoader extends LifecycleMBeanBase
         Class<?>[] argTypes = { ClassLoader.class };
         Object[] args = { parentClassLoader };
         Constructor<?> constr = clazz.getConstructor(argTypes);
-        classLoader = (WebappClassLoaderBase) constr.newInstance(args); // 反射调用ClassLoader的构造方法,设置 WebappClassLoader 的父加载器为 sharedLoader
+        classLoader = (WebappClassLoaderBase) constr.newInstance(args); // 创建 WebappClassLoader. 反射调用 WebappClassLoader(ClassLoader parent) 的构造方法,设置 WebappClassLoader 的父加载器为 sharedLoader
 
         return classLoader;
 

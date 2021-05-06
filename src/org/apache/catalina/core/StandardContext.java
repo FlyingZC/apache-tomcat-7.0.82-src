@@ -2378,7 +2378,7 @@ public class StandardContext extends ContainerBase
         if (getPrivileged()) {
             return this.getClass().getClassLoader();
         } else if (parent != null) {
-            return (parent.getParentClassLoader());
+            return (parent.getParentClassLoader()); // 通过context的父容器host.getParentClassLoader()获取 parentClassLoader
         }
         return (ClassLoader.getSystemClassLoader());
     }
@@ -5434,7 +5434,7 @@ public class StandardContext extends ContainerBase
 
         if (getLoader() == null) { // 创建 WebappLoader,每个web应用都使用各自的 WebappClassLoader
             WebappLoader webappLoader = new WebappLoader(getParentClassLoader());
-            webappLoader.setDelegate(getDelegate());
+            webappLoader.setDelegate(getDelegate()); // delegate默认为false
             setLoader(webappLoader);
         }
 
@@ -5482,7 +5482,7 @@ public class StandardContext extends ContainerBase
 
 
         // Binding thread
-        ClassLoader oldCCL = bindThread();
+        ClassLoader oldCCL = bindThread();  // 将 Loader 中的 ParallelWebappClassLoader 绑定到当前线程中,并返回 catalina 类加载器
 
         try {
 
@@ -5497,7 +5497,7 @@ public class StandardContext extends ContainerBase
                 // created.
                 // By calling unbindThread and bindThread in a row, we setup the
                 // current Thread CCL to be the webapp classloader
-                unbindThread(oldCCL);
+                unbindThread(oldCCL);  // 解除线程上下文类加载器绑定
                 oldCCL = bindThread();
 
                 // Initialize logger again. Other components might have used it

@@ -98,7 +98,7 @@ public final class Bootstrap {
         String value = CatalinaProperties.getProperty(name + ".loader"); // value 是需要加载的资源列表
         if ((value == null) || (value.equals(""))) // 如果没有配置 server.loader 或 shared.loader 等,则返回父类加载器,即此处为 commonLoader
             return parent;
-
+        // 替换占位符
         value = replace(value);
 
         List<Repository> repositories = new ArrayList<Repository>();
@@ -185,7 +185,7 @@ public final class Bootstrap {
     }
 
 
-    /** 1.创建 catalinaLoader 类加载器,并设置为 main 线程的线程上下文类加载器; 2.通过 catalinaLoader 加载类 Catalina 并创建 Catalina 对象,并保存到 Boosstrap 对象
+    /** 1.创建 catalinaLoader 类加载器,并设置为 main 线程的线程上下文类加载器; 2.通过 catalinaLoader 加载类 Catalina 并创建 Catalina 对象,并保存到 bootstrap 对象
      * Initialize daemon.
      */
     public void init()
@@ -424,8 +424,8 @@ public final class Bootstrap {
                 daemon.stop();
             } else if (command.equals("start")) { // 处理 start 命令
                 daemon.setAwait(true);
-                daemon.load(args); // 加载配置资源,通过反射调用 catalina.load() 方法,创建 digester 实例,解析 conf/server.xml 文件
-                daemon.start(); // 运行各个组件,容器开始启动
+                daemon.load(args); // 加载配置资源,通过反射调用 catalina.load() 方法,创建 digester 实例,解析 conf/server.xml 文件.调用server.init()方法
+                daemon.start(); // catalina.start() 运行各个组件,容器开始启动
             } else if (command.equals("stop")) {
                 daemon.stopServer(args);
             } else if (command.equals("configtest")) {

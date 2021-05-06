@@ -187,7 +187,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
 
     public void contextStopping() {
         this.lastContextStoppedTime.set(System.currentTimeMillis());
-
+        // 销毁线程池 ThreadPoolExecutor.首先将任务队列设为 0,再设置coreSize为0（会触发线程池内线程的interrupt),从而销毁空闲的线程
         // save the current pool parameters to restore them later
         int savedCorePoolSize = this.getCorePoolSize();
         TaskQueue taskQueue =

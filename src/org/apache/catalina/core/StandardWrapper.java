@@ -1130,7 +1130,7 @@ public class StandardWrapper extends ContainerBase
 
             InstanceManager instanceManager = ((StandardContext)getParent()).getInstanceManager();
             try {
-                servlet = (Servlet) instanceManager.newInstance(servletClass);
+                servlet = (Servlet) instanceManager.newInstance(servletClass); // 创建 servlet 实例
             } catch (ClassCastException e) {
                 unavailable(null);
                 // Restore the context ClassLoader

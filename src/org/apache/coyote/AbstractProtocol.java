@@ -552,7 +552,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         protected AtomicLong registerCount = new AtomicLong(0);
         /**ConcurrentHashMap<NioChannel, Http11NioProcessor>此Map维护socket通道与processor的关系.所以若processor一次不能读取到 所需所有数据 就等下一次根据socket找到这个processor继续读取。*/
         protected final Map<S,Processor<S>> connections = new ConcurrentHashMap<S,Processor<S>>();
-
+        /** 回收的Processors,可以重复利用 */
         protected RecycledProcessors<P,S> recycledProcessors =
             new RecycledProcessors<P,S>(this);
 
@@ -597,10 +597,10 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
             try {
                 if (processor == null) {// 若连接缓存connections中不存在Socket对应的Http11Processor，则从可以循环使用的recycledProcessors（类型为ConcurrentLinkedQueue）中获取
-                    processor = recycledProcessors.poll();
+                    processor = recycledProcessors.poll(); // 从缓存中获取
                 }
-                if (processor == null) {// 若recycledProcessors中也没有可以使用的Http11Processor，则调用createProcessor方法创建ttp11Processor
-                    processor = createProcessor();
+                if (processor == null) {// 若recycledProcessors中也没有可以使用的Http11Processor，则调用createProcessor方法创建Http11Processor
+                    processor = createProcessor(); // 获取不到则创建
                 }
                 // 若Connector 标签设置了 SSLEnabled=true 需要给Http11Processor 设置SSL相关的属性(加密)
                 initSsl(wrapper, processor);
