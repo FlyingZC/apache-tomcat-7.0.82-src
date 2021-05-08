@@ -797,14 +797,14 @@ public class StandardHost extends ContainerBase implements Host {
         if ((errorValve != null) && (!errorValve.equals(""))) {
             try {
                 boolean found = false;
-                Valve[] valves = getPipeline().getValves();
+                Valve[] valves = getPipeline().getValves(); // 获取host的所有values
                 for (Valve valve : valves) {
-                    if (errorValve.equals(valve.getClass().getName())) {
+                    if (errorValve.equals(valve.getClass().getName())) { // 查找 errorValve
                         found = true;
                         break;
                     }
                 }
-                if(!found) {
+                if(!found) { // 若找不到 errorValve,则反射创建并添加到 pipeline 中
                     Valve valve =
                         (Valve) Class.forName(errorValve).newInstance();
                     getPipeline().addValve(valve);
@@ -816,7 +816,7 @@ public class StandardHost extends ContainerBase implements Host {
                         errorValve), t);
             }
         }
-        super.startInternal();// 调用父类ContainerBase.startInternal()启动虚拟主机
+        super.startInternal();// 调用父类 ContainerBase.startInternal()
     }
 
 

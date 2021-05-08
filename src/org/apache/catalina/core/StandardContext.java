@@ -5017,7 +5017,7 @@ public class StandardContext extends ContainerBase
         ApplicationListener listeners[] = applicationListeners;
         Object results[] = new Object[listeners.length];
         boolean ok = true;
-        for (int i = 0; i < results.length; i++) {
+        for (int i = 0; i < results.length; i++) { // 遍历listener
             if (getLogger().isDebugEnabled())
                 getLogger().debug(" Configuring event listener class '" +
                     listeners[i] + "'");
@@ -6139,14 +6139,14 @@ public class StandardContext extends ContainerBase
     protected ClassLoader bindThread() {
 
         ClassLoader oldContextClassLoader =
-            Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().getContextClassLoader(); // 获取当前线程 上下文类加载器
 
         if (getResources() == null)
             return oldContextClassLoader;
 
         if (getLoader() != null && getLoader().getClassLoader() != null) {
             Thread.currentThread().setContextClassLoader
-                (getLoader().getClassLoader());
+                (getLoader().getClassLoader()); // 将当前线程的上下文类加载器 设置为 WebappLoader
         }
 
         DirContextURLStreamHandler.bindThread(getResources());

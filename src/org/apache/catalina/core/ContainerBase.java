@@ -1697,7 +1697,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
         @Override
         public Void call() throws LifecycleException {
-            child.start();
+            child.start(); // 调用子容器生命周期 start() 方法
             return null;
         }
     }
